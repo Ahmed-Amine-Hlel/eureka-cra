@@ -32,7 +32,7 @@ export const getRandomPostTitle = async (): Promise<string> => {
 // const chatbotApi = axios.create({
 //   baseURL: 'https://the.chatbot.api/',
 //   headers: {
-//     'X-Api-Key': process.env.CHATBOT_API_KEY,
+//     'X-Api-Key': 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
 //   },
 // });
 
