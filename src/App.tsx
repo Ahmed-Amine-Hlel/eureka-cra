@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import './App.css';
 import ChatInput from './components/ChatInput';
-import { RobotIcon, UserIcon } from './icons';
+import { getRandomPostTitle } from './api';
+import { CircularProgress } from '@mui/material';
+import ModeToggle from './components/ModeToggle';
+import SourceDropdown from './components/SourceDropdown';
+import PersonIcon from '@mui/icons-material/Person';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
 
 interface Message {
   id: number;
@@ -18,7 +22,7 @@ function App() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSendMessage = (messageText: string) => {
+  const handleSendMessage = async (messageText: string) => {
     setIsLoading(true);
     const newMessage: Message = {
       id: Date.now(),
@@ -27,20 +31,15 @@ function App() {
     };
     setMessages([...messages, newMessage]);
 
+    const randomPostTitle = await getRandomPostTitle();
+
     const botMessageId = Date.now() + 1000000;
     setMessages((prevMessages) => [
       ...prevMessages,
       { id: botMessageId, text: 'loading', sender: 'bot' },
     ]);
 
-    setTimeout(
-      () =>
-        simulateBotResponse(
-          'This is a simulated bot response for your message.',
-          botMessageId
-        ),
-      2000
-    );
+    setTimeout(() => simulateBotResponse(randomPostTitle, botMessageId), 1500);
   };
 
   const simulateBotResponse = (botMessage: string, botMessageId: number) => {
@@ -73,12 +72,13 @@ function App() {
     <div
       style={{
         background: '#F1F2F6',
-        height: '100vh',
+        minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
         gap: '16px',
       }}
     >
+      <ModeToggle />
       <div
         style={{
           alignSelf: 'center',
@@ -91,7 +91,7 @@ function App() {
         }}
       >
         <div style={{ textAlign: 'center', marginTop: '8px' }}>
-          <div style={{ fontSize: '3rem', fontWeight: 'bold' }}>Eureka</div>
+          <div style={{ fontSize: '3rem' }}>Eureka</div>
           {messages.length === 0 && (
             <div style={{ fontSize: '1.25rem', marginTop: '8px' }}>
               How can I help you today?
@@ -110,98 +110,73 @@ function App() {
           }}
         >
           {messages.map((message) => (
-            <div
-              key={message.id}
-              style={{
-                display: 'flex',
-                gap: '16px',
-                alignItems: 'center',
-                padding: '8px 12px',
-                borderRadius: '12px',
-                background:
-                  message.sender === 'user'
-                    ? 'rgba(135, 35, 65, 0.25)'
-                    : 'transparent',
-                overflowWrap: 'break-word',
-                wordBreak: 'break-word',
-                maxWidth: '100%',
-              }}
-            >
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
               <div
+                key={message.id}
                 style={{
-                  padding: '8px',
-                  borderRadius: '12px',
-                  background: message.sender === 'user' ? '#872341' : '#346751',
+                  display: 'flex',
+                  gap: '16px',
+                  alignItems: 'center',
+                  padding: '8px 12px',
+                  borderRadius: '10px',
+                  background:
+                    message.sender === 'user' ? '#E1E3E8' : 'transparent',
+                  overflowWrap: 'break-word',
+                  wordBreak: 'break-word',
+                  maxWidth: '100%',
                 }}
               >
-                {message.sender === 'user' ? (
-                  <UserIcon
-                    style={{
-                      width: '1.25rem',
-                      height: '1.25rem',
-                    }}
-                  />
-                ) : (
-                  <RobotIcon
-                    style={{
-                      width: '1.25rem',
-                      height: '1.25rem',
-                    }}
-                  />
-                )}
-              </div>
-              <div
-                style={{
-                  fontSize: '1rem',
-                  fontWeight: 'bold',
-                  breakInside: 'avoid',
-                }}
-              >
-                {message.text === 'loading' ? (
-                  <div
-                    style={{
-                      display: 'flex',
-                      height: '12px',
-                      width: '12px',
-                      position: 'relative',
-                    }}
-                  >
-                    <span
+                <div
+                  style={{
+                    padding: '6px',
+                    borderRadius: '12px',
+                    background:
+                      message.sender === 'user' ? '#872341' : '#346751',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {message.sender === 'user' ? (
+                    <PersonIcon
+                      style={{ color: '#F1F2F6', fontSize: '1.75rem' }}
+                    />
+                  ) : (
+                    <SmartToyIcon
+                      style={{ color: '#F1F2F6', fontSize: '1.75rem' }}
+                    />
+                  )}
+                </div>
+                <div
+                  style={{
+                    fontSize: '1rem',
+                    breakInside: 'avoid',
+                    flexGrow: 1,
+                  }}
+                >
+                  {message.text === 'loading' ? (
+                    <CircularProgress
+                      size={16}
                       style={{
-                        animation:
-                          'ping 1s cubic-bezier(0, 0, 0.2, 1) infinite',
-                        position: 'absolute',
-                        display: 'inline-flex',
-                        height: '100%',
-                        width: '100%',
-                        borderRadius: 'full',
-                        backgroundColor: '#394e6a',
-                        opacity: 0.75,
+                        display: 'flex',
+                        alignItems: 'center',
                       }}
-                    ></span>
-                    <span
-                      style={{
-                        position: 'relative',
-                        display: 'inline-flex',
-                        borderRadius: 'full',
-                        height: '12px',
-                        width: '12px',
-                        backgroundColor: '#394e6a',
-                      }}
-                    ></span>
-                  </div>
-                ) : (
-                  message.text
-                )}
+                    />
+                  ) : (
+                    message.text
+                  )}
+                </div>
               </div>
+              {message.sender === 'bot' && message.text !== 'loading' && (
+                <SourceDropdown />
+              )}
             </div>
           ))}
           <div ref={messagesEndRef} />
         </div>
       </div>
-      <div style={{ position: 'absolute', bottom: '0', width: '100%' }}>
-        <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
-      </div>
+
+      <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
     </div>
   );
 }
