@@ -31,14 +31,15 @@ function App() {
     };
     setMessages([...messages, newMessage]);
 
+    // const botResponse = await getChatbotResponse(messageText);
     const randomPostTitle = await getRandomPostTitle();
-
     const botMessageId = Date.now() + 1000000;
     setMessages((prevMessages) => [
       ...prevMessages,
       { id: botMessageId, text: 'loading', sender: 'bot' },
     ]);
 
+    // setTimeout(() => simulateBotResponse(botResponse, botMessageId), 1500);
     setTimeout(() => simulateBotResponse(randomPostTitle, botMessageId), 1500);
   };
 

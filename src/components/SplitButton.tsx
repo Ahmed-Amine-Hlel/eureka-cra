@@ -20,16 +20,18 @@ interface SplitButtonProps {
   buttonLabel: string;
   options: string[];
   isSplit?: boolean;
+  onSelect: (selectedOption: string) => void;
 }
 
 const SplitButton: React.FC<SplitButtonProps> = ({
   buttonLabel,
   options = [],
   isSplit = false,
+  onSelect,
 }) => {
   const [open, setOpen] = useState(false);
   const anchorRef = useRef<HTMLDivElement>(null);
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   const handleMenuItemClick = (
     _event: ReactMouseEvent<HTMLLIElement>,
@@ -37,6 +39,7 @@ const SplitButton: React.FC<SplitButtonProps> = ({
   ) => {
     setSelectedIndex(index);
     setOpen(false);
+    onSelect(options[index]);
   };
 
   const handleToggle = () => {
@@ -59,13 +62,24 @@ const SplitButton: React.FC<SplitButtonProps> = ({
     setOpen(false);
   };
 
+  const handleMainButtonClick = () => {
+    if (options.length === 0) {
+      onSelect(buttonLabel);
+    } else if (selectedIndex != null) {
+      onSelect(options[selectedIndex]);
+    }
+  };
+
   return (
     <>
       <ButtonGroup variant="outlined" ref={anchorRef} aria-label="split button">
         <Button
+          onClick={handleMainButtonClick}
           style={{ flexGrow: '1', color: '#222831', borderColor: '#222831' }}
         >
-          {buttonLabel}
+          {options.length > 0 && selectedIndex != null
+            ? options[selectedIndex]
+            : buttonLabel}
         </Button>
         {isSplit && options.length > 0 && (
           <>

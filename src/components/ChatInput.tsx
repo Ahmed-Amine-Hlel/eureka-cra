@@ -56,6 +56,9 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
         buttonLabel={label}
         options={hasSubs ? splitButtonOptions[index] : []}
         isSplit={hasSubs}
+        onSelect={(selectedOption) => {
+          console.log(`Selected option from ${label}: ${selectedOption}`);
+        }}
       />
     );
   });
