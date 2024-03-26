@@ -21,6 +21,7 @@ interface SplitButtonProps {
   options: string[];
   isSplit?: boolean;
   onSelect: (selectedOption: string) => void;
+  isSelected?: boolean;
 }
 
 const SplitButton: React.FC<SplitButtonProps> = ({
@@ -28,6 +29,7 @@ const SplitButton: React.FC<SplitButtonProps> = ({
   options = [],
   isSplit = false,
   onSelect,
+  isSelected,
 }) => {
   const [open, setOpen] = useState(false);
   const anchorRef = useRef<HTMLDivElement>(null);
@@ -39,7 +41,7 @@ const SplitButton: React.FC<SplitButtonProps> = ({
   ) => {
     setSelectedIndex(index);
     setOpen(false);
-    onSelect(options[index]);
+    onSelect(`${buttonLabel}:${options[index]}`);
   };
 
   const handleToggle = () => {
@@ -75,7 +77,12 @@ const SplitButton: React.FC<SplitButtonProps> = ({
       <ButtonGroup variant="outlined" ref={anchorRef} aria-label="split button">
         <Button
           onClick={handleMainButtonClick}
-          style={{ flexGrow: '1', color: '#222831', borderColor: '#222831' }}
+          style={{
+            flexGrow: '1',
+            color: '#222831',
+            borderColor: '#222831',
+            backgroundColor: isSelected ? '#d8dadf' : 'transparent',
+          }}
         >
           {options.length > 0 && selectedIndex != null
             ? options[selectedIndex]
@@ -90,7 +97,11 @@ const SplitButton: React.FC<SplitButtonProps> = ({
               aria-label="select merge strategy"
               aria-haspopup="menu"
               onClick={handleToggle}
-              style={{ color: '#222831', borderColor: '#222831' }}
+              style={{
+                color: '#222831',
+                borderColor: '#222831',
+                backgroundColor: isSelected ? '#d8dadf' : 'transparent',
+              }}
             >
               <ArrowDropDownIcon />
             </Button>

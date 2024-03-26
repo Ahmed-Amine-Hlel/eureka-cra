@@ -3,14 +3,19 @@ import ChatInput from './components/ChatInput';
 import { getRandomPostTitle } from './api';
 import { CircularProgress } from '@mui/material';
 import ModeToggle from './components/ModeToggle';
-import SourceDropdown from './components/SourceDropdown';
+import SourceAccordion from './components/SourceAccordion';
 import PersonIcon from '@mui/icons-material/Person';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
+
+import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
 
 interface Message {
   id: number;
   text: string;
   sender: 'user' | 'bot';
+  feedback?: 'up' | 'down' | 'selected-up' | 'selected-down' | null;
+  feedbackAnimationCompleted?: boolean;
 }
 
 function App() {
@@ -39,7 +44,7 @@ function App() {
       { id: botMessageId, text: 'loading', sender: 'bot' },
     ]);
 
-    // setTimeout(() => simulateBotResponse(botResponse, botMessageId), 1500);
+    // simulateBotResponse(botResponse, botMessageId);
     setTimeout(() => simulateBotResponse(randomPostTitle, botMessageId), 1500);
   };
 
@@ -69,6 +74,29 @@ function App() {
       }, totalDelay);
     });
   };
+
+  const handleFeedback = (messageId: number, feedback: 'up' | 'down'): void => {
+    setMessages(
+      messages.map((message) => {
+        if (message.id === messageId) {
+          return { ...message, feedback: `selected-${feedback}` };
+        }
+        return message;
+      })
+    );
+
+    setTimeout(() => {
+      setMessages(
+        messages.map((message) => {
+          if (message.id === messageId) {
+            return { ...message, feedbackAnimationCompleted: true };
+          }
+          return message;
+        })
+      );
+    }, 600);
+  };
+
   return (
     <div
       style={{
@@ -111,7 +139,10 @@ function App() {
           }}
         >
           {messages.map((message) => (
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div
+              key={message.id}
+              style={{ display: 'flex', flexDirection: 'column' }}
+            >
               <div
                 key={message.id}
                 style={{
@@ -169,7 +200,58 @@ function App() {
                 </div>
               </div>
               {message.sender === 'bot' && message.text !== 'loading' && (
-                <SourceDropdown />
+                <>
+                  <SourceAccordion />
+                  {!message.feedbackAnimationCompleted && (
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'flex-start',
+                        paddingTop: '8px',
+                        paddingLeft: '20px',
+                        transition: 'opacity 0.5s ease-in-out',
+                        opacity:
+                          message.feedback &&
+                          message.feedback.startsWith('selected')
+                            ? 0
+                            : 1,
+                      }}
+                    >
+                      <ThumbUpOffAltIcon
+                        onClick={() => handleFeedback(message.id, 'up')}
+                        style={{
+                          cursor: 'pointer',
+                          marginRight: 8,
+                          color:
+                            message.feedback === 'selected-up'
+                              ? '#163020'
+                              : 'inherit',
+                          transition: 'transform 0.5s ease',
+                          transform:
+                            message.feedback === 'selected-up'
+                              ? 'scale(1.5)'
+                              : 'scale(1)',
+                        }}
+                      />
+                      <ThumbDownOffAltIcon
+                        onClick={() => handleFeedback(message.id, 'down')}
+                        style={{
+                          cursor: 'pointer',
+                          color:
+                            message.feedback === 'selected-down'
+                              ? '#BF3131'
+                              : 'inherit',
+                          transition: 'transform 0.5s ease',
+                          transform:
+                            message.feedback === 'selected-down'
+                              ? 'scale(1.5)'
+                              : 'scale(1)',
+                        }}
+                      />
+                    </div>
+                  )}
+                </>
               )}
             </div>
           ))}

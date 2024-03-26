@@ -10,6 +10,12 @@ interface ChatInputProps {
 
 const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
   const [message, setMessage] = useState('');
+  const [selectedButton, setSelectedButton] = useState<string | null>(null);
+
+  const handleSelect = (selectedOption: string) => {
+    console.log(`Selected option: ${selectedOption}`);
+    setSelectedButton(selectedOption);
+  };
 
   const handleSubmit = (event?: React.FormEvent) => {
     event?.preventDefault();
@@ -38,27 +44,26 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
 
   const splitButtonOptions = [
     [],
-    ['Date collection 1', 'Date collection 2', 'Date collection3'],
+    ['Data collection 1', 'Data collection 2', 'Data collection 3'],
     ['Document 1', 'Document 2', 'Document 3'],
     [],
   ];
 
   const buttons = [
     'Everything',
-    'Date collection',
+    'Data collection',
     'Document',
     'Model only',
   ].map((label, index) => {
-    const hasSubs = label === 'Date collection' || label === 'Document';
+    const hasSubs = label === 'Data collection' || label === 'Document';
     return (
       <SplitButton
         key={label}
         buttonLabel={label}
         options={hasSubs ? splitButtonOptions[index] : []}
         isSplit={hasSubs}
-        onSelect={(selectedOption) => {
-          console.log(`Selected option from ${label}: ${selectedOption}`);
-        }}
+        onSelect={handleSelect}
+        isSelected={!!selectedButton && selectedButton.startsWith(label)}
       />
     );
   });
@@ -86,24 +91,6 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
             backgroundColor: 'transparent',
           }}
         >
-          {/* <textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleKeyDown}
-            style={{
-              width: '100%',
-              padding: '8px 20px',
-              fontSize: '14px',
-              backgroundColor: 'transparent',
-              verticalAlign: 'middle',
-              border: 'none',
-              outline: 'none',
-              resize: 'none',
-              overflow: 'hidden',
-            }}
-            placeholder="Type your message here..."
-            rows={1}
-          /> */}
           <TextareaAutosize
             minRows={1}
             style={{

@@ -1,4 +1,7 @@
 import axios from 'axios';
+// import axios, { AxiosResponse } from 'axios';
+
+// ===================================================================================================
 
 const api = axios.create({
   baseURL: 'https://jsonplaceholder.typicode.com',
@@ -20,10 +23,16 @@ export const getRandomPostTitle = async (): Promise<string> => {
   }
 };
 
+// ===================================================================================================
+
+// interface ChatbotApiResponse {
+//   bot_response: string;
+// }
+
 // const chatbotApi = axios.create({
 //   baseURL: 'https://the.chatbot.api/',
 //   headers: {
-//     'X-Api-Key': 'api_key',
+//     'X-Api-Key': process.env.CHATBOT_API_KEY,
 //   },
 // });
 
@@ -32,7 +41,7 @@ export const getRandomPostTitle = async (): Promise<string> => {
 //   conversationHistory?: string
 // ): Promise<string> => {
 //   try {
-//     const response: AxiosResponse = await chatbotApi.post(
+//     const response: AxiosResponse<ChatbotApiResponse> = await chatbotApi.post(
 //       '/chatbot/send-message',
 //       {
 //         message: messageText,
