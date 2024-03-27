@@ -1,26 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 import ChatInput from './components/ChatInput';
 import { getRandomPostTitle } from './api';
-import { CircularProgress } from '@mui/material';
 import ModeToggle from './components/ModeToggle';
-import SourceAccordion from './components/SourceAccordion';
-import PersonIcon from '@mui/icons-material/Person';
-import SmartToyIcon from '@mui/icons-material/SmartToy';
-
-import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
-import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
-
-interface Message {
-  id: number;
-  text: string;
-  sender: 'user' | 'bot';
-  feedback?: 'up' | 'down' | 'selected-up' | 'selected-down' | null;
-  feedbackAnimationCompleted?: boolean;
-}
+import FeedbackDialog from './components/FeedbackDialog';
+import { Message } from './types/message';
+import MessageDisplay from './components/MessageDisplay';
 
 function App() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [feedbackType, setFeedbackType] = useState<'up' | 'down' | null>(null);
+
+  const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
+  const [feedbackMessageId, setFeedbackMessageId] = useState<number | null>(
+    null
+  );
+  const [feedbackReason, setFeedbackReason] = useState('');
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -75,26 +70,56 @@ function App() {
     });
   };
 
-  const handleFeedback = (messageId: number, feedback: 'up' | 'down'): void => {
-    setMessages(
-      messages.map((message) => {
-        if (message.id === messageId) {
-          return { ...message, feedback: `selected-${feedback}` };
-        }
-        return message;
-      })
-    );
+  const handleFeedback = (messageId: number, feedback: 'up' | 'down') => {
+    openFeedbackDialog(messageId, feedback);
+  };
 
-    setTimeout(() => {
+  const openFeedbackDialog = (messageId: number, feedback: 'up' | 'down') => {
+    setFeedbackDialogOpen(true);
+    setFeedbackMessageId(messageId);
+    setFeedbackType(feedback);
+  };
+
+  const handleFeedbackReasonChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setFeedbackReason(event.target.value);
+  };
+
+  const handleFeedbackSubmit = () => {
+    if (feedbackMessageId != null && feedbackType != null) {
+      const feedbackValue = `selected-${feedbackType}` as
+        | 'selected-up'
+        | 'selected-down';
+
       setMessages(
-        messages.map((message) => {
-          if (message.id === messageId) {
-            return { ...message, feedbackAnimationCompleted: true };
-          }
-          return message;
-        })
+        messages.map((message) =>
+          message.id === feedbackMessageId
+            ? {
+                ...message,
+                feedbackReason,
+                feedback: feedbackValue,
+                feedbackAnimationCompleted: false,
+              }
+            : message
+        )
       );
-    }, 600);
+
+      setFeedbackDialogOpen(false);
+      setFeedbackReason('');
+      setFeedbackMessageId(null);
+      setFeedbackType(null);
+
+      setTimeout(() => {
+        setMessages(
+          messages.map((message) =>
+            message.id === feedbackMessageId
+              ? { ...message, feedbackAnimationCompleted: true }
+              : message
+          )
+        );
+      }, 800);
+    }
   };
 
   return (
@@ -139,126 +164,23 @@ function App() {
           }}
         >
           {messages.map((message) => (
-            <div
-              key={message.id}
-              style={{ display: 'flex', flexDirection: 'column' }}
-            >
-              <div
-                key={message.id}
-                style={{
-                  display: 'flex',
-                  gap: '16px',
-                  alignItems: 'center',
-                  padding: '8px 12px',
-                  borderRadius: '10px',
-                  background:
-                    message.sender === 'user' ? '#E1E3E8' : 'transparent',
-                  overflowWrap: 'break-word',
-                  wordBreak: 'break-word',
-                  maxWidth: '100%',
-                }}
-              >
-                <div
-                  style={{
-                    padding: '6px',
-                    borderRadius: '12px',
-                    background:
-                      message.sender === 'user' ? '#872341' : '#346751',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  {message.sender === 'user' ? (
-                    <PersonIcon
-                      style={{ color: '#F1F2F6', fontSize: '1.75rem' }}
-                    />
-                  ) : (
-                    <SmartToyIcon
-                      style={{ color: '#F1F2F6', fontSize: '1.75rem' }}
-                    />
-                  )}
-                </div>
-                <div
-                  style={{
-                    fontSize: '1rem',
-                    breakInside: 'avoid',
-                    flexGrow: 1,
-                  }}
-                >
-                  {message.text === 'loading' ? (
-                    <CircularProgress
-                      size={16}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                      }}
-                    />
-                  ) : (
-                    message.text
-                  )}
-                </div>
-              </div>
-              {message.sender === 'bot' && message.text !== 'loading' && (
-                <>
-                  <SourceAccordion />
-                  {!message.feedbackAnimationCompleted && (
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'flex-start',
-                        paddingTop: '8px',
-                        paddingLeft: '20px',
-                        transition: 'opacity 0.5s ease-in-out',
-                        opacity:
-                          message.feedback &&
-                          message.feedback.startsWith('selected')
-                            ? 0
-                            : 1,
-                      }}
-                    >
-                      <ThumbUpOffAltIcon
-                        onClick={() => handleFeedback(message.id, 'up')}
-                        style={{
-                          cursor: 'pointer',
-                          marginRight: 8,
-                          color:
-                            message.feedback === 'selected-up'
-                              ? '#163020'
-                              : 'inherit',
-                          transition: 'transform 0.5s ease',
-                          transform:
-                            message.feedback === 'selected-up'
-                              ? 'scale(1.5)'
-                              : 'scale(1)',
-                        }}
-                      />
-                      <ThumbDownOffAltIcon
-                        onClick={() => handleFeedback(message.id, 'down')}
-                        style={{
-                          cursor: 'pointer',
-                          color:
-                            message.feedback === 'selected-down'
-                              ? '#BF3131'
-                              : 'inherit',
-                          transition: 'transform 0.5s ease',
-                          transform:
-                            message.feedback === 'selected-down'
-                              ? 'scale(1.5)'
-                              : 'scale(1)',
-                        }}
-                      />
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
+            <MessageDisplay message={message} onFeedback={handleFeedback} />
           ))}
           <div ref={messagesEndRef} />
         </div>
       </div>
-
+      <FeedbackDialog
+        open={feedbackDialogOpen}
+        feedbackReason={feedbackReason}
+        onClose={() => {
+          setFeedbackDialogOpen(false);
+          setFeedbackReason('');
+          setFeedbackMessageId(null);
+          setFeedbackType(null);
+        }}
+        onSubmit={handleFeedbackSubmit}
+        onReasonChange={handleFeedbackReasonChange}
+      />
       <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
     </div>
   );
