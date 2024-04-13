@@ -1,19 +1,8 @@
-import { UserManager } from 'oidc-client';
+import userManager from '../utils/userManager';
 
 const LoginPage = () => {
-  const userManager = new UserManager({
-    authority:
-      'https://itgp.apigee.dev.echonet/auth/oauth2/v2/.well-known/openid-configuration',
-    client_id: 'qStb3Z8O7GXIzB1tGmIvhFSe3LaYbBJv',
-    redirect_uri: 'http://localhost:3000/callback.com',
-    response_type: 'code',
-    scope: 'openid',
-  });
-
-  const onLoginClick = () => {
-    userManager.signinRedirect().catch(function (error) {
-      console.error('Failed to login:', error);
-    });
+  const onLoginClick = async () => {
+    await userManager.signinRedirect();
   };
 
   const styles = {

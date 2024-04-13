@@ -5,8 +5,22 @@ import ModeToggle from '../components/ModeToggle';
 import MessageDisplay from '../components/MessageDisplay';
 import FeedbackDialog from '../components/FeedbackDialog';
 import ChatInput from '../components/ChatInput';
+import userManager from '../utils/userManager';
 
 function HomePage() {
+  useEffect(() => {
+    userManager
+      .signinRedirectCallback()
+      .then(function (user) {
+        if (user) {
+          console.log('Logged in user : ', user);
+        }
+      })
+      .catch(function (e) {
+        console.error(e);
+      });
+  }, []);
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [feedbackType, setFeedbackType] = useState<'up' | 'down' | null>(null);
