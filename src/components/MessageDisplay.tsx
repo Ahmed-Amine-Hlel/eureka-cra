@@ -17,7 +17,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
   onFeedback,
 }) => {
   return (
-    <div key={message.id} style={{ display: 'flex', flexDirection: 'column' }}>
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
       <div
         style={{
           display: 'flex',
@@ -37,8 +37,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
             borderRadius: '12px',
             background: message.sender === 'user' ? '#872341' : '#346751',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            alignSelf: 'flex-start',
           }}
         >
           {message.sender === 'user' ? (

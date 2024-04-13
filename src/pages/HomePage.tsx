@@ -187,7 +187,11 @@ function HomePage() {
           }}
         >
           {messages.map((message) => (
-            <MessageDisplay message={message} onFeedback={handleFeedback} />
+            <MessageDisplay
+              key={message.id}
+              message={message}
+              onFeedback={handleFeedback}
+            />
           ))}
           <div ref={messagesEndRef} />
         </div>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { IconButton, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 interface ModeToggleProps {}
 
@@ -13,6 +14,10 @@ const ModeToggle: React.FC<ModeToggleProps> = () => {
     if (newMode !== null) {
       setMode(newMode);
     }
+  };
+
+  const handleLogout = () => {
+    console.log('User logged out');
   };
 
   return (
@@ -31,6 +36,12 @@ const ModeToggle: React.FC<ModeToggleProps> = () => {
           Admin
         </ToggleButton>
       </ToggleButtonGroup>
+      <IconButton
+        onClick={handleLogout}
+        style={{ color: 'gray', margin: '10px' }}
+      >
+        <LogoutIcon />
+      </IconButton>
     </div>
   );
 };
