@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Message } from '../types/message';
-import { getRandomPostTitle } from '../api';
+import { getChatbotResponse } from '../api';
 import ModeToggle from '../components/ModeToggle';
 import MessageDisplay from '../components/MessageDisplay';
 import FeedbackDialog from '../components/FeedbackDialog';
@@ -14,6 +14,10 @@ function HomePage() {
       .then(function (user) {
         if (user) {
           console.log('Logged in user : ', user);
+
+          localStorage.setItem('access_token', user.access_token);
+          localStorage.setItem('refresh_token', user.refresh_token);
+          localStorage.setItem('expires_at', user.expires_at.toString());
         }
       })
       .catch(function (e) {
@@ -45,16 +49,14 @@ function HomePage() {
     };
     setMessages([...messages, newMessage]);
 
-    // const botResponse = await getChatbotResponse(messageText);
-    const randomPostTitle = await getRandomPostTitle();
+    const botResponse = await getChatbotResponse(messageText);
     const botMessageId = Date.now() + 1000000;
     setMessages((prevMessages) => [
       ...prevMessages,
       { id: botMessageId, text: 'loading', sender: 'bot' },
     ]);
 
-    // simulateBotResponse(botResponse, botMessageId);
-    setTimeout(() => simulateBotResponse(randomPostTitle, botMessageId), 1500);
+    simulateBotResponse(botResponse, botMessageId);
   };
 
   const simulateBotResponse = (botMessage: string, botMessageId: number) => {
