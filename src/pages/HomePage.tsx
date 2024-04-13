@@ -12,12 +12,19 @@ function HomePage() {
     userManager
       .signinRedirectCallback()
       .then(function (user) {
-        if (user) {
+        if (
+          user &&
+          user.access_token &&
+          user.refresh_token &&
+          user.expires_at
+        ) {
           console.log('Logged in user : ', user);
 
           localStorage.setItem('access_token', user.access_token);
           localStorage.setItem('refresh_token', user.refresh_token);
           localStorage.setItem('expires_at', user.expires_at.toString());
+        } else {
+          throw new Error('Failed to retrieve authentication tokens');
         }
       })
       .catch(function (e) {
