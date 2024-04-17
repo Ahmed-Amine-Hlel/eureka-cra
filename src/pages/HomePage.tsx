@@ -56,7 +56,15 @@ function HomePage() {
     };
     setMessages([...messages, newMessage]);
 
-    const botResponse = await getChatbotResponse(messageText);
+    const conversationHistory = messages
+      .map((m) => `${m.text}#${m.sender}`)
+      .join(' ');
+
+    console.log('conversationHistory', conversationHistory);
+    const botResponse = await getChatbotResponse(
+      messageText,
+      conversationHistory
+    );
     const botMessageId = Date.now() + 1000000;
     setMessages((prevMessages) => [
       ...prevMessages,
