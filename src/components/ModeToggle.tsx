@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { IconButton, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
+import userManager from '../utils/userManager';
 
 interface ModeToggleProps {}
 
@@ -16,8 +17,15 @@ const ModeToggle: React.FC<ModeToggleProps> = () => {
     }
   };
 
-  const handleLogout = () => {
-    console.log('User logged out');
+  const handleLogout = async () => {
+    try {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('expires_at');
+      await userManager.signoutRedirect();
+    } catch (error) {
+      console.error('Logout failed', error);
+    }
   };
 
   return (
