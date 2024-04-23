@@ -6,6 +6,9 @@ import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
 import SourceAccordion from './SourceAccordion';
 import { Message } from '../types/message';
+import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { materialDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface MessageDisplayProps {
   message: Message;
@@ -16,6 +19,26 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
   message,
   onFeedback,
 }) => {
+  const renderers: { [nodeType: string]: React.ElementType } = {
+    code({ node, inline, className, children, ...props }) {
+      const match = /language-(\w+)/.exec(className || '');
+      return !inline && match ? (
+        <SyntaxHighlighter
+          style={materialDark}
+          language={match[1]}
+          PreTag="div"
+          {...props}
+        >
+          {String(children).replace(/\n$/, '')}
+        </SyntaxHighlighter>
+      ) : (
+        <code className={className} {...props}>
+          {children}
+        </code>
+      );
+    },
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <div
@@ -53,7 +76,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
               style={{ display: 'flex', alignItems: 'center' }}
             />
           ) : (
-            message.text
+            <ReactMarkdown children={message.text} components={renderers} />
           )}
         </div>
       </div>
