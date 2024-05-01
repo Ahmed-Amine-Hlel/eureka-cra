@@ -79,9 +79,11 @@ const SplitButton: React.FC<SplitButtonProps> = ({
           onClick={handleMainButtonClick}
           style={{
             flexGrow: '1',
-            color: '#222831',
-            borderColor: '#222831',
-            backgroundColor: isSelected ? '#d8dadf' : 'transparent',
+            color: '#F1F2F6',
+            borderColor: 'transparent',
+            backgroundColor: isSelected ? '#344955' : '#289D73',
+            borderRadius: isSplit ? '20px 0 0 20px' : '20px',
+            padding: '0.5rem 1.5rem',
           }}
         >
           {options.length > 0 && selectedIndex != null
@@ -98,9 +100,10 @@ const SplitButton: React.FC<SplitButtonProps> = ({
               aria-haspopup="menu"
               onClick={handleToggle}
               style={{
-                color: '#222831',
-                borderColor: '#222831',
-                backgroundColor: isSelected ? '#d8dadf' : 'transparent',
+                color: '#F1F2F6',
+                borderColor: 'transparent',
+                backgroundColor: isSelected ? '#344955' : '#289D73',
+                borderRadius: '0 20px 20px 0',
               }}
             >
               <ArrowDropDownIcon />

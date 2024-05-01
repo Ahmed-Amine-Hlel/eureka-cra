@@ -155,8 +155,7 @@ function HomePage() {
   return (
     <div
       style={{
-        background: '#F1F2F6',
-        // minHeight: '100vh',
+        background: '#fff',
         flex: 1,
         display: 'flex',
         flexDirection: 'column',

@@ -87,7 +87,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
             flexGrow: 1,
             alignItems: 'center',
             border: '1px solid #222831',
-            borderRadius: '16px',
+            borderRadius: '25px',
             backgroundColor: 'transparent',
           }}
         >

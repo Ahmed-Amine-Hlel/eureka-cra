@@ -24,7 +24,25 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
       const match = /language-(\w+)/.exec(className || '');
       return !inline && match ? (
         <SyntaxHighlighter
-          style={materialDark}
+          style={{
+            ...materialDark,
+            'pre[class*="language-"]': {
+              ...materialDark['pre[class*="language-"]'],
+              backgroundColor: '#F1F2F6',
+              color: '#000',
+            },
+            'pre[class*="language-"] > code[class*="language-"]': {
+              ...materialDark[
+                'pre[class*="language-"] > code[class*="language-"]'
+              ],
+              backgroundColor: '#F1F2F6',
+              border: 'none',
+            },
+            'code[class*="language-"]': {
+              backgroundColor: '#F1F2F6',
+              border: 'none',
+            },
+          }}
           language={match[1]}
           PreTag="div"
           {...props}
@@ -39,6 +57,19 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
     },
   };
 
+  //   const messageText = `well this is the code you requested
+  // \`\`\`jsx
+  // const ExampleComponent = () => {
+  //   return (
+  //     <div>
+  //       <h1>Hello, World!</h1>
+  //       <p>Welcome to our site.</p>
+  //     </div>
+  //   );
+  // };
+  // \`\`\`
+  // `;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <div
@@ -48,7 +79,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
           alignItems: 'center',
           padding: '8px 12px',
           borderRadius: '10px',
-          background: message.sender === 'user' ? '#E1E3E8' : 'transparent',
+          background: message.sender === 'user' ? '#E8EBEF' : 'transparent',
           overflowWrap: 'break-word',
           wordBreak: 'break-word',
           maxWidth: '100%',
@@ -57,10 +88,11 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
         <div
           style={{
             padding: '6px',
-            borderRadius: '12px',
-            background: message.sender === 'user' ? '#872341' : '#346751',
+            borderRadius: '100%',
+            background: message.sender === 'user' ? '#2fa470' : '#0033A0',
             display: 'flex',
             alignSelf: 'flex-start',
+            marginTop: '10px',
           }}
         >
           {message.sender === 'user' ? (
