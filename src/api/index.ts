@@ -6,7 +6,7 @@ interface ChatbotApiResponse {
 }
 
 const chatbotApi = axios.create({
-  baseURL: 'https://the.chatbot.api/',
+  baseURL: process.env.REACT_APP_BASE_URL,
 });
 
 chatbotApi.interceptors.request.use(
