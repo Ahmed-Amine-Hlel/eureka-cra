@@ -29,10 +29,6 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
     buttonLabel: keyof ButtonStates,
     selectedOptions: string[] | null
   ) => {
-    const isAlreadySelected = Array.isArray(buttonStates[buttonLabel])
-      ? (buttonStates[buttonLabel] as string[]).length > 0
-      : buttonStates[buttonLabel] === true;
-
     const newButtonStates: ButtonStates = {
       Everything: false,
       'Data collection': [],
@@ -40,9 +36,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
       'Model only': false,
     };
 
-    if (isAlreadySelected && selectedOptions === null) {
-      newButtonStates[buttonLabel] = buttonStates[buttonLabel];
-    } else if (Array.isArray(buttonStates[buttonLabel])) {
+    if (Array.isArray(buttonStates[buttonLabel])) {
       newButtonStates[buttonLabel] = selectedOptions || [];
     } else {
       newButtonStates[buttonLabel] = !buttonStates[buttonLabel];

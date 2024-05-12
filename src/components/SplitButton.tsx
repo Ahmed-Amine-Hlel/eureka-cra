@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Button,
   ButtonGroup,
@@ -72,6 +72,12 @@ const SplitButton: React.FC<SplitButtonProps> = ({
       onSelect(isSelected ? null : []);
     }
   };
+
+  useEffect(() => {
+    if (!isSelected) {
+      setSelectedIndices([]);
+    }
+  }, [isSelected]);
 
   return (
     <ButtonGroup variant="outlined" ref={anchorRef} aria-label="split button">
