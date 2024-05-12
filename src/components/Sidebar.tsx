@@ -96,7 +96,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               <ListItemText primary={session.name} />
 
               <IconButton onClick={(event) => openMenu(event, session.id)}>
-                <MoreHorizIcon style={{ color: '#F1F2F6' }} />
+                <MoreHorizIcon style={{ color: 'black' }} />
               </IconButton>
             </ListItem>
           ))}

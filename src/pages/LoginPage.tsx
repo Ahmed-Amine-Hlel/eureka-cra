@@ -1,4 +1,3 @@
-import React from 'react';
 import userManager from '../utils/userManager';
 import styles from './LoginPage.module.css';
 import Footer from '../layout/Footer';
