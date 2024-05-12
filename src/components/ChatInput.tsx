@@ -8,13 +8,47 @@ interface ChatInputProps {
   isLoading: boolean;
 }
 
+interface ButtonStates {
+  Everything: boolean;
+  'Data collection': string[];
+  Document: string[];
+  'Model only': boolean;
+  [key: string]: boolean | string[];
+}
+
 const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
   const [message, setMessage] = useState('');
-  const [selectedButton, setSelectedButton] = useState<string | null>(null);
+  const [buttonStates, setButtonStates] = useState<ButtonStates>({
+    Everything: true,
+    'Data collection': [],
+    Document: [],
+    'Model only': false,
+  });
 
-  const handleSelect = (selectedOption: string) => {
-    console.log(`Selected option: ${selectedOption}`);
-    setSelectedButton(selectedOption);
+  const handleSelect = (
+    buttonLabel: keyof ButtonStates,
+    selectedOptions: string[] | null
+  ) => {
+    const isAlreadySelected = Array.isArray(buttonStates[buttonLabel])
+      ? (buttonStates[buttonLabel] as string[]).length > 0
+      : buttonStates[buttonLabel] === true;
+
+    const newButtonStates: ButtonStates = {
+      Everything: false,
+      'Data collection': [],
+      Document: [],
+      'Model only': false,
+    };
+
+    if (isAlreadySelected && selectedOptions === null) {
+      newButtonStates[buttonLabel] = buttonStates[buttonLabel];
+    } else if (Array.isArray(buttonStates[buttonLabel])) {
+      newButtonStates[buttonLabel] = selectedOptions || [];
+    } else {
+      newButtonStates[buttonLabel] = !buttonStates[buttonLabel];
+    }
+
+    setButtonStates(newButtonStates);
   };
 
   const handleSubmit = (event?: React.FormEvent) => {
@@ -56,14 +90,24 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
     'Model only',
   ].map((label, index) => {
     const hasSubs = label === 'Data collection' || label === 'Document';
+
+    let isSelected = false;
+    const currentState = buttonStates[label];
+
+    if (Array.isArray(currentState)) {
+      isSelected = currentState.length > 0;
+    } else {
+      isSelected = currentState as boolean;
+    }
+
     return (
       <SplitButton
         key={label}
         buttonLabel={label}
         options={hasSubs ? splitButtonOptions[index] : []}
         isSplit={hasSubs}
-        onSelect={handleSelect}
-        isSelected={!!selectedButton && selectedButton.startsWith(label)}
+        onSelect={(options) => handleSelect(label, options)}
+        isSelected={isSelected}
       />
     );
   });

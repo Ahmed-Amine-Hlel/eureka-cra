@@ -29,10 +29,19 @@ const ModeToggle: React.FC<ModeToggleProps> = () => {
   };
 
   return (
-    <div style={{ position: 'absolute', top: 0, left: 0, padding: '10px' }}>
+    <div
+      style={{
+        padding: '5px 20px',
+        borderTop: '1px solid #ccc',
+        color: '#F1F2F6',
+        display: 'flex',
+        alignItems: 'center',
+        width: '100%',
+      }}
+    >
       <IconButton
         onClick={handleLogout}
-        style={{ color: 'gray', margin: '10px' }}
+        style={{ color: '#F1F2F6', margin: '10px' }}
       >
         <LogoutIcon />
       </IconButton>
@@ -42,6 +51,7 @@ const ModeToggle: React.FC<ModeToggleProps> = () => {
         onChange={handleModeChange}
         aria-label="User mode"
         size="small"
+        sx={{ backgroundColor: '#F1F2F6' }}
       >
         <ToggleButton value="user" aria-label="User">
           User

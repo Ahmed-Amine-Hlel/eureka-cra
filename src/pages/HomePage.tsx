@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Message } from '../types/message';
 import { getChatbotResponse } from '../api';
-import ModeToggle from '../components/ModeToggle';
 import MessageDisplay from '../components/MessageDisplay';
 import FeedbackDialog from '../components/FeedbackDialog';
 import ChatInput from '../components/ChatInput';
 import userManager from '../utils/userManager';
+import { useSessions } from '../contexts/SessionContext';
+import Sidebar from '../components/Sidebar';
+import Footer from '../layout/Footer';
 
 function HomePage() {
   useEffect(() => {
@@ -32,6 +34,9 @@ function HomePage() {
       });
   }, []);
 
+  const { addSession, sessions } = useSessions();
+  const currentSessionId = sessions.length ? sessions[0].id : null;
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [feedbackType, setFeedbackType] = useState<'up' | 'down' | null>(null);
@@ -49,6 +54,12 @@ function HomePage() {
 
   const handleSendMessage = async (messageText: string) => {
     setIsLoading(true);
+    if (messages.length === 0) {
+      const timestamp = new Date().toLocaleString();
+      const sessionName = `Eureka ${timestamp}`;
+      addSession(sessionName);
+    }
+
     const newMessage: Message = {
       id: Date.now(),
       text: messageText,
@@ -98,6 +109,16 @@ function HomePage() {
         }
       }, totalDelay);
     });
+  };
+
+  const handleNewSession = () => {
+    setMessages([]);
+  };
+
+  const handleSessionDelete = (sessionId: string) => {
+    if (sessionId === currentSessionId) {
+      setMessages([]);
+    }
   };
 
   const handleFeedback = (messageId: number, feedback: 'up' | 'down') => {
@@ -155,67 +176,79 @@ function HomePage() {
   return (
     <div
       style={{
-        background: '#fff',
-        flex: 1,
         display: 'flex',
-        flexDirection: 'column',
-        gap: '16px',
+        height: '100vh',
+        width: '100vw',
       }}
     >
-      <ModeToggle />
+      <Sidebar
+        handleNewSession={handleNewSession}
+        handleSessionDelete={handleSessionDelete}
+      />
       <div
         style={{
-          alignSelf: 'center',
+          background: '#fff',
+          flex: 1,
           display: 'flex',
           flexDirection: 'column',
           gap: '16px',
-          width: '50%',
-          flex: 1,
-          justifyContent: messages.length === 0 ? 'center' : 'flex-start',
         }}
       >
-        <div style={{ textAlign: 'center', marginTop: '8px' }}>
-          <div style={{ fontSize: '3rem' }}>Eureka</div>
-          {messages.length === 0 && (
-            <div style={{ fontSize: '1.25rem', marginTop: '8px' }}>
-              How can I help you today?
-            </div>
-          )}
-        </div>
         <div
           style={{
+            alignSelf: 'center',
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: messages.length === 0 ? 'center' : 'flex-start',
             gap: '16px',
-            overflow: 'auto',
-            maxHeight: 'calc(100vh - 288px)',
-            padding: '32px 12px',
+            width: '50%',
+            flex: 1,
+            justifyContent: messages.length === 0 ? 'center' : 'flex-start',
           }}
         >
-          {messages.map((message) => (
-            <MessageDisplay
-              key={message.id}
-              message={message}
-              onFeedback={handleFeedback}
-            />
-          ))}
-          <div ref={messagesEndRef} />
+          <div style={{ textAlign: 'center', marginTop: '8px' }}>
+            <div style={{ fontSize: '3rem' }}>Eureka</div>
+            {messages.length === 0 && (
+              <div style={{ fontSize: '1.25rem', marginTop: '8px' }}>
+                How can I help you today?
+              </div>
+            )}
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: messages.length === 0 ? 'center' : 'flex-start',
+              gap: '16px',
+              overflow: 'auto',
+              maxHeight: 'calc(100vh - 288px)',
+              padding: '32px 12px',
+            }}
+          >
+            {messages.map((message) => (
+              <MessageDisplay
+                key={message.id}
+                message={message}
+                onFeedback={handleFeedback}
+              />
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
         </div>
+        <FeedbackDialog
+          open={feedbackDialogOpen}
+          feedbackReason={feedbackReason}
+          onClose={() => {
+            setFeedbackDialogOpen(false);
+            setFeedbackReason('');
+            setFeedbackMessageId(null);
+            setFeedbackType(null);
+          }}
+          onSubmit={handleFeedbackSubmit}
+          onReasonChange={handleFeedbackReasonChange}
+        />
+        <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+        <Footer />
       </div>
-      <FeedbackDialog
-        open={feedbackDialogOpen}
-        feedbackReason={feedbackReason}
-        onClose={() => {
-          setFeedbackDialogOpen(false);
-          setFeedbackReason('');
-          setFeedbackMessageId(null);
-          setFeedbackType(null);
-        }}
-        onSubmit={handleFeedbackSubmit}
-        onReasonChange={handleFeedbackReasonChange}
-      />
-      <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
     </div>
   );
 }
