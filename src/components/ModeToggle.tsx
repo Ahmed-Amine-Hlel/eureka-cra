@@ -31,20 +31,14 @@ const ModeToggle: React.FC<ModeToggleProps> = () => {
   return (
     <div
       style={{
-        padding: '5px 20px',
+        padding: '15px 20px',
         borderTop: '1px solid #ccc',
         color: '#F1F2F6',
         display: 'flex',
-        alignItems: 'center',
+        justifyContent: 'center',
         width: '100%',
       }}
     >
-      <IconButton
-        onClick={handleLogout}
-        style={{ color: '#F1F2F6', margin: '10px' }}
-      >
-        <LogoutIcon />
-      </IconButton>
       <ToggleButtonGroup
         value={mode}
         exclusive
@@ -60,6 +54,9 @@ const ModeToggle: React.FC<ModeToggleProps> = () => {
           Admin
         </ToggleButton>
       </ToggleButtonGroup>
+      <IconButton onClick={handleLogout} style={{ color: '#C73659' }}>
+        <LogoutIcon />
+      </IconButton>
     </div>
   );
 };

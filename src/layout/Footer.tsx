@@ -5,7 +5,7 @@ const footerStyle: CSSProperties = {
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  padding: '2rem 5rem',
+  padding: '0.5rem 5rem',
   backgroundColor: '#e3e9f4',
   width: '100%',
 };

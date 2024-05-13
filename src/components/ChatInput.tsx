@@ -163,7 +163,6 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
               style={{
                 width: '24px',
                 height: '24px',
-                fill: '#222831',
               }}
             />
           </button>

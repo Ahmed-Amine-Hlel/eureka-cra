@@ -1,7 +1,7 @@
 import {
   IconButton,
   List,
-  ListItem,
+  ListItemButton,
   ListItemText,
   Menu,
   MenuItem,
@@ -24,6 +24,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   const { sessions, deleteSession } = useSessions();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+
+  //   console.log('currentSessionId', currentSessionId);
 
   const openMenu = (
     event: MouseEvent<HTMLButtonElement>,
@@ -55,7 +57,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        width: 260,
+        width: 270,
         backgroundColor: '#EEEEEE',
         color: 'black',
         overflow: 'auto',
@@ -92,13 +94,24 @@ const Sidebar: React.FC<SidebarProps> = ({
           }}
         >
           {sessions.map((session) => (
-            <ListItem key={session.id}>
-              <ListItemText primary={session.name} />
+            <ListItemButton
+              key={session.id}
+              onClick={() => console.log('Session selected:', session.id)}
+              //   sx={{
+              //     backgroundColor:
+              //       session.id === currentSessionId ? '#D6DBF5' : 'inherit',
+              //   }}
+              divider={true}
+            >
+              <ListItemText
+                primary={session.name}
+                primaryTypographyProps={{ fontSize: '0.875rem' }}
+              />
 
               <IconButton onClick={(event) => openMenu(event, session.id)}>
                 <MoreHorizIcon style={{ color: 'black' }} />
               </IconButton>
-            </ListItem>
+            </ListItemButton>
           ))}
         </List>
       )}

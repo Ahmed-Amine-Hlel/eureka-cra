@@ -1,6 +1,5 @@
 import userManager from '../utils/userManager';
 import styles from './LoginPage.module.css';
-import Footer from '../layout/Footer';
 
 const LoginPage = () => {
   const onLoginClick = async () => {
@@ -18,7 +17,6 @@ const LoginPage = () => {
           </button>
         </div>
       </div>
-      <Footer />
     </>
   );
 };

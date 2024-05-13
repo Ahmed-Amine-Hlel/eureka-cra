@@ -7,7 +7,6 @@ import ChatInput from '../components/ChatInput';
 import userManager from '../utils/userManager';
 import { useSessions } from '../contexts/SessionContext';
 import Sidebar from '../components/Sidebar';
-import Footer from '../layout/Footer';
 
 function HomePage() {
   useEffect(() => {
@@ -247,7 +246,6 @@ function HomePage() {
           onReasonChange={handleFeedbackReasonChange}
         />
         <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
-        <Footer />
       </div>
     </div>
   );
