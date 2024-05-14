@@ -1,10 +1,12 @@
 import {
+  Box,
   IconButton,
   List,
   ListItemButton,
   ListItemText,
   Menu,
   MenuItem,
+  Typography,
 } from '@mui/material';
 import { useSessions } from '../contexts/SessionContext';
 import ModeToggle from './ModeToggle';
@@ -77,16 +79,34 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
       ) : (
         <>
-          <IconButton
-            style={{
-              backgroundColor: '#F1F2F6 ',
-              margin: '15px',
-              alignSelf: 'flex-end',
-            }}
-            onClick={handleNewSession}
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            width="100%"
+            padding="15px"
+            fontStyle={{}}
           >
-            <AddBoxIcon />
-          </IconButton>
+            <Typography
+              variant="h6"
+              style={{
+                flexGrow: 1,
+                textAlign: 'start',
+              }}
+            >
+              New Chat
+            </Typography>
+            <IconButton
+              style={{
+                backgroundColor: '#F1F2F6 ',
+                margin: '15px',
+                alignSelf: 'flex-end',
+              }}
+              onClick={handleNewSession}
+            >
+              <AddBoxIcon />
+            </IconButton>
+          </Box>
           <List
             style={{
               overflowY: 'auto',
