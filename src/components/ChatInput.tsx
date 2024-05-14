@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { SendIcon } from '../icons';
-import SplitButton from './SplitButton';
 import TextareaAutosize from '@mui/material/TextareaAutosize';
+import { Autocomplete, Button, Chip, TextField } from '@mui/material';
+import styled from '@emotion/styled';
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -16,8 +17,19 @@ interface ButtonStates {
   [key: string]: boolean | string[];
 }
 
+const CustomTextField = styled(TextField)({
+  '& .MuiOutlinedInput-root': {
+    '& fieldset': {
+      borderRadius: '30px',
+    },
+  },
+});
+
 const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
   const [message, setMessage] = useState('');
+  const [dataCollection, setDataCollection] = useState<string[]>([]);
+  const [document, setDocument] = useState<string[]>([]);
+
   const [buttonStates, setButtonStates] = useState<ButtonStates>({
     Everything: true,
     'Data collection': [],
@@ -25,24 +37,11 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
     'Model only': false,
   });
 
-  const handleSelect = (
-    buttonLabel: keyof ButtonStates,
-    selectedOptions: string[] | null
-  ) => {
-    const newButtonStates: ButtonStates = {
-      Everything: false,
-      'Data collection': [],
-      Document: [],
-      'Model only': false,
-    };
-
-    if (Array.isArray(buttonStates[buttonLabel])) {
-      newButtonStates[buttonLabel] = selectedOptions || [];
-    } else {
-      newButtonStates[buttonLabel] = !buttonStates[buttonLabel];
-    }
-
-    setButtonStates(newButtonStates);
+  const handleButtonToggle = (buttonLabel: keyof ButtonStates) => {
+    setButtonStates((prev) => ({
+      ...prev,
+      [buttonLabel]: !prev[buttonLabel],
+    }));
   };
 
   const handleSubmit = (event?: React.FormEvent) => {
@@ -69,42 +68,6 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
       );
     }
   };
-
-  const splitButtonOptions = [
-    [],
-    ['Data collection 1', 'Data collection 2', 'Data collection 3'],
-    ['Document 1', 'Document 2', 'Document 3'],
-    [],
-  ];
-
-  const buttons = [
-    'Everything',
-    'Data collection',
-    'Document',
-    'Model only',
-  ].map((label, index) => {
-    const hasSubs = label === 'Data collection' || label === 'Document';
-
-    let isSelected = false;
-    const currentState = buttonStates[label];
-
-    if (Array.isArray(currentState)) {
-      isSelected = currentState.length > 0;
-    } else {
-      isSelected = currentState as boolean;
-    }
-
-    return (
-      <SplitButton
-        key={label}
-        buttonLabel={label}
-        options={hasSubs ? splitButtonOptions[index] : []}
-        isSplit={hasSubs}
-        onSelect={(options) => handleSelect(label, options)}
-        isSelected={isSelected}
-      />
-    );
-  });
 
   return (
     <div
@@ -173,9 +136,95 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
           display: 'flex',
           justifyContent: 'center',
           gap: '10px',
+          width: '100%',
         }}
       >
-        {buttons}
+        <Button
+          onClick={() => handleButtonToggle('Everything')}
+          variant="contained"
+          sx={{
+            backgroundColor: buttonStates.Everything ? '#344955' : '#289D73',
+            color: '#F1F2F6',
+            '&:hover': {
+              backgroundColor: buttonStates.Everything ? '#2E434E' : '#249E6B',
+            },
+            borderRadius: '30px',
+            padding: '0.5rem 1.5rem',
+          }}
+        >
+          Everything
+        </Button>
+        <Autocomplete
+          multiple
+          id="tags-data-collection"
+          options={[
+            'Data collection 1',
+            'Data collection 2',
+            'Data collection 3',
+          ]}
+          value={dataCollection}
+          onChange={(event, newValue) => setDataCollection(newValue)}
+          renderTags={(value: string[], getTagProps) =>
+            value.map((option: string, index: number) => (
+              <Chip
+                variant="outlined"
+                label={option}
+                {...getTagProps({ index })}
+              />
+            ))
+          }
+          renderInput={(params) => (
+            <CustomTextField
+              {...params}
+              variant="outlined"
+              label="Data Collection"
+              placeholder="Add more"
+            />
+          )}
+          style={{ width: '25%' }}
+        />
+        <Autocomplete
+          multiple
+          id="tags-document"
+          options={['Document 1', 'Document 2', 'Document 3']}
+          value={document}
+          onChange={(_event, newValue) => setDocument(newValue)}
+          renderTags={(value: string[], getTagProps) =>
+            value.map((option: string, index: number) => (
+              <Chip
+                variant="outlined"
+                label={option}
+                {...getTagProps({ index })}
+              />
+            ))
+          }
+          renderInput={(params) => (
+            <CustomTextField
+              {...params}
+              variant="outlined"
+              label="Document"
+              placeholder="Add more"
+            />
+          )}
+          style={{ width: '25%' }}
+        />
+        <Button
+          onClick={() => handleButtonToggle('Model only')}
+          variant="contained"
+          sx={{
+            backgroundColor: buttonStates['Model only'] ? '#344955' : '#289D73',
+            color: '#F1F2F6',
+            '&:hover': {
+              backgroundColor: buttonStates['Model only']
+                ? '#2E434E'
+                : '#249E6B',
+            },
+            borderRadius: '30px',
+            padding: '0.5rem 1.5rem',
+          }}
+        >
+          Model Only
+        </Button>
       </div>
     </div>
   );

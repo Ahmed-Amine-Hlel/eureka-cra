@@ -8,9 +8,9 @@ import {
 } from '@mui/material';
 import { useSessions } from '../contexts/SessionContext';
 import ModeToggle from './ModeToggle';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useState, MouseEvent } from 'react';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import AddBoxIcon from '@mui/icons-material/AddBox';
 
 interface SidebarProps {
   handleNewSession: () => void;
@@ -63,17 +63,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         overflow: 'auto',
       }}
     >
-      <IconButton
-        style={{
-          backgroundColor: '#F1F2F6 ',
-          margin: '15px',
-          alignSelf: 'flex-end',
-        }}
-        onClick={handleNewSession}
-      >
-        <OpenInNewIcon />
-      </IconButton>
-
       {sessions.length === 0 ? (
         <div
           style={{
@@ -87,33 +76,45 @@ const Sidebar: React.FC<SidebarProps> = ({
           No sessions yet
         </div>
       ) : (
-        <List
-          style={{
-            overflowY: 'auto',
-            flex: 1,
-          }}
-        >
-          {sessions.map((session) => (
-            <ListItemButton
-              key={session.id}
-              onClick={() => console.log('Session selected:', session.id)}
-              //   sx={{
-              //     backgroundColor:
-              //       session.id === currentSessionId ? '#D6DBF5' : 'inherit',
-              //   }}
-              divider={true}
-            >
-              <ListItemText
-                primary={session.name}
-                primaryTypographyProps={{ fontSize: '0.875rem' }}
-              />
+        <>
+          <IconButton
+            style={{
+              backgroundColor: '#F1F2F6 ',
+              margin: '15px',
+              alignSelf: 'flex-end',
+            }}
+            onClick={handleNewSession}
+          >
+            <AddBoxIcon />
+          </IconButton>
+          <List
+            style={{
+              overflowY: 'auto',
+              flex: 1,
+            }}
+          >
+            {sessions.map((session) => (
+              <ListItemButton
+                key={session.id}
+                onClick={() => console.log('Session selected:', session.id)}
+                //   sx={{
+                //     backgroundColor:
+                //       session.id === currentSessionId ? '#D6DBF5' : 'inherit',
+                //   }}
+                divider={true}
+              >
+                <ListItemText
+                  primary={session.name}
+                  primaryTypographyProps={{ fontSize: '0.875rem' }}
+                />
 
-              <IconButton onClick={(event) => openMenu(event, session.id)}>
-                <MoreHorizIcon style={{ color: 'black' }} />
-              </IconButton>
-            </ListItemButton>
-          ))}
-        </List>
+                <IconButton onClick={(event) => openMenu(event, session.id)}>
+                  <MoreHorizIcon style={{ color: 'black' }} />
+                </IconButton>
+              </ListItemButton>
+            ))}
+          </List>
+        </>
       )}
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
         <MenuItem>Rename</MenuItem>
