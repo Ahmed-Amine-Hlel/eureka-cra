@@ -150,6 +150,8 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
             },
             borderRadius: '30px',
             padding: '0.5rem 1.5rem',
+            boxShadow: 'none',
+            border: '1px solid transparent',
           }}
         >
           Everything
@@ -221,6 +223,8 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
             },
             borderRadius: '30px',
             padding: '0.5rem 1.5rem',
+            boxShadow: 'none',
+            border: '1px solid transparent',
           }}
         >
           Model Only
