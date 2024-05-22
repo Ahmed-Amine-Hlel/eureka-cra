@@ -7,6 +7,9 @@ import ChatInput from '../components/ChatInput';
 import userManager from '../utils/userManager';
 import { useSessions } from '../contexts/SessionContext';
 import Sidebar from '../components/Sidebar';
+import Footer from '../layout/Footer';
+import MenuIcon from '@mui/icons-material/Menu';
+import IconButton from '@mui/material/IconButton';
 
 function HomePage() {
   useEffect(() => {
@@ -39,6 +42,7 @@ function HomePage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [feedbackType, setFeedbackType] = useState<'up' | 'down' | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
   const [feedbackMessageId, setFeedbackMessageId] = useState<number | null>(
@@ -173,16 +177,12 @@ function HomePage() {
   };
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        height: '100vh',
-        width: '100vw',
-      }}
-    >
+    <div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
       <Sidebar
         handleNewSession={handleNewSession}
         handleSessionDelete={handleSessionDelete}
+        sidebarOpen={sidebarOpen}
+        toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
       />
       <div
         style={{
@@ -191,15 +191,28 @@ function HomePage() {
           display: 'flex',
           flexDirection: 'column',
           gap: '16px',
+          transition: 'margin-left 0.3s ease',
         }}
       >
+        <IconButton
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          style={{
+            position: 'absolute',
+            top: '10px',
+            left: sidebarOpen ? '290px' : '10px',
+            transition: 'left 0.3s ease',
+          }}
+        >
+          <MenuIcon />
+        </IconButton>
         <div
           style={{
             alignSelf: 'center',
             display: 'flex',
             flexDirection: 'column',
             gap: '16px',
-            width: '50%',
+            width: '85%',
+            overflow: 'auto',
             flex: 1,
             justifyContent: messages.length === 0 ? 'center' : 'flex-start',
           }}
@@ -219,7 +232,6 @@ function HomePage() {
               justifyContent: messages.length === 0 ? 'center' : 'flex-start',
               gap: '16px',
               overflow: 'auto',
-              maxHeight: 'calc(100vh - 288px)',
               padding: '32px 12px',
             }}
           >
@@ -246,6 +258,7 @@ function HomePage() {
           onReasonChange={handleFeedbackReasonChange}
         />
         <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+        <Footer />
       </div>
     </div>
   );

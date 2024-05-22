@@ -1,48 +1,48 @@
 import React, { useState } from 'react';
 import { SendIcon } from '../icons';
 import TextareaAutosize from '@mui/material/TextareaAutosize';
-import { Autocomplete, Button, Chip, TextField } from '@mui/material';
-import styled from '@emotion/styled';
+// import { Autocomplete, Button, Chip, TextField } from '@mui/material';
+// import styled from '@emotion/styled';
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
   isLoading: boolean;
 }
 
-interface ButtonStates {
-  Everything: boolean;
-  'Data collection': string[];
-  Document: string[];
-  'Model only': boolean;
-  [key: string]: boolean | string[];
-}
+// interface ButtonStates {
+//   Everything: boolean;
+//   'Data collection': string[];
+//   Document: string[];
+//   'Model only': boolean;
+//   [key: string]: boolean | string[];
+// }
 
-const CustomTextField = styled(TextField)({
-  '& .MuiOutlinedInput-root': {
-    '& fieldset': {
-      borderRadius: '30px',
-    },
-  },
-});
+// const CustomTextField = styled(TextField)({
+//   '& .MuiOutlinedInput-root': {
+//     '& fieldset': {
+//       borderRadius: '30px',
+//     },
+//   },
+// });
 
 const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
   const [message, setMessage] = useState('');
-  const [dataCollection, setDataCollection] = useState<string[]>([]);
-  const [document, setDocument] = useState<string[]>([]);
+  // const [dataCollection, setDataCollection] = useState<string[]>([]);
+  // const [document, setDocument] = useState<string[]>([]);
 
-  const [buttonStates, setButtonStates] = useState<ButtonStates>({
-    Everything: true,
-    'Data collection': [],
-    Document: [],
-    'Model only': false,
-  });
+  // const [buttonStates, setButtonStates] = useState<ButtonStates>({
+  //   Everything: true,
+  //   'Data collection': [],
+  //   Document: [],
+  //   'Model only': false,
+  // });
 
-  const handleButtonToggle = (buttonLabel: keyof ButtonStates) => {
-    setButtonStates((prev) => ({
-      ...prev,
-      [buttonLabel]: !prev[buttonLabel],
-    }));
-  };
+  // const handleButtonToggle = (buttonLabel: keyof ButtonStates) => {
+  //   setButtonStates((prev) => ({
+  //     ...prev,
+  //     [buttonLabel]: !prev[buttonLabel],
+  //   }));
+  // };
 
   const handleSubmit = (event?: React.FormEvent) => {
     event?.preventDefault();
@@ -81,7 +81,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
         width: '100%',
       }}
     >
-      <form onSubmit={handleSubmit} style={{ width: '50%' }}>
+      <form onSubmit={handleSubmit} style={{ width: '85%' }}>
         <div
           style={{
             display: 'flex',
@@ -131,7 +131,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
           </button>
         </div>
       </form>
-      <div
+      {/* <div
         style={{
           display: 'flex',
           justifyContent: 'center',
@@ -229,7 +229,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
         >
           Model Only
         </Button>
-      </div>
+      </div> */}
     </div>
   );
 };

@@ -17,17 +17,19 @@ import AddBoxIcon from '@mui/icons-material/AddBox';
 interface SidebarProps {
   handleNewSession: () => void;
   handleSessionDelete: (sessionId: string) => void;
+  sidebarOpen: boolean;
+  toggleSidebar: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
   handleNewSession,
   handleSessionDelete,
+  sidebarOpen,
+  toggleSidebar,
 }) => {
   const { sessions, deleteSession } = useSessions();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
-
-  //   console.log('currentSessionId', currentSessionId);
 
   const openMenu = (
     event: MouseEvent<HTMLButtonElement>,
@@ -39,13 +41,11 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
 
   const handleClose = () => {
-    console.log('Menu closed');
     setAnchorEl(null);
     setCurrentSessionId(null);
   };
 
   const handleDelete = () => {
-    console.log('Deleting session ID:', currentSessionId);
     if (currentSessionId) {
       deleteSession(currentSessionId);
       handleSessionDelete(currentSessionId);
@@ -59,25 +59,16 @@ const Sidebar: React.FC<SidebarProps> = ({
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        width: 270,
+        width: sidebarOpen ? '270px' : '0',
         backgroundColor: '#EEEEEE',
         color: 'black',
-        overflow: 'auto',
+        overflow: 'hidden',
+        transition: 'width 0.3s ease, opacity 0.3s ease',
+        opacity: sidebarOpen ? 1 : 0,
+        visibility: sidebarOpen ? 'visible' : 'hidden',
       }}
     >
-      {sessions.length === 0 ? (
-        <div
-          style={{
-            overflowY: 'auto',
-            flex: 1,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          No sessions yet
-        </div>
-      ) : (
+      {sidebarOpen && (
         <>
           <Box
             display="flex"
@@ -85,13 +76,15 @@ const Sidebar: React.FC<SidebarProps> = ({
             alignItems="center"
             width="100%"
             padding="15px"
-            fontStyle={{}}
           >
             <Typography
               variant="h6"
               style={{
                 flexGrow: 1,
                 textAlign: 'start',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
               }}
             >
               New Chat
@@ -117,10 +110,6 @@ const Sidebar: React.FC<SidebarProps> = ({
               <ListItemButton
                 key={session.id}
                 onClick={() => console.log('Session selected:', session.id)}
-                //   sx={{
-                //     backgroundColor:
-                //       session.id === currentSessionId ? '#D6DBF5' : 'inherit',
-                //   }}
                 divider={true}
               >
                 <ListItemText

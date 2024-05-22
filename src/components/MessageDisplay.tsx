@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
 import PersonIcon from '@mui/icons-material/Person';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
@@ -9,6 +9,9 @@ import { Message } from '../types/message';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { materialDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import Tooltip from '@mui/material/Tooltip';
 
 interface MessageDisplayProps {
   message: Message;
@@ -19,36 +22,60 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
   message,
   onFeedback,
 }) => {
+  const [copied, setCopied] = useState(false);
+
   const renderers: { [nodeType: string]: React.ElementType } = {
     code({ node, inline, className, children, ...props }) {
       const match = /language-(\w+)/.exec(className || '');
+      const codeString = String(children).replace(/\n$/, '');
+
       return !inline && match ? (
-        <SyntaxHighlighter
-          style={{
-            ...materialDark,
-            'pre[class*="language-"]': {
-              ...materialDark['pre[class*="language-"]'],
-              backgroundColor: '#F1F2F6',
-              color: '#000',
-            },
-            'pre[class*="language-"] > code[class*="language-"]': {
-              ...materialDark[
-                'pre[class*="language-"] > code[class*="language-"]'
-              ],
-              backgroundColor: '#F1F2F6',
-              border: 'none',
-            },
-            'code[class*="language-"]': {
-              backgroundColor: '#F1F2F6',
-              border: 'none',
-            },
-          }}
-          language={match[1]}
-          PreTag="div"
-          {...props}
-        >
-          {String(children).replace(/\n$/, '')}
-        </SyntaxHighlighter>
+        <div style={{ position: 'relative' }}>
+          <CopyToClipboard text={codeString} onCopy={() => setCopied(true)}>
+            <Tooltip
+              title={copied ? 'Copied!' : 'Copy to clipboard'}
+              arrow
+              onClose={() => setCopied(false)}
+            >
+              <ContentCopyIcon
+                style={{
+                  position: 'absolute',
+                  top: 10,
+                  right: 10,
+                  cursor: 'pointer',
+                  color: '#555',
+                  zIndex: 1,
+                }}
+              />
+            </Tooltip>
+          </CopyToClipboard>
+          <SyntaxHighlighter
+            style={{
+              ...materialDark,
+              'pre[class*="language-"]': {
+                ...materialDark['pre[class*="language-"]'],
+                backgroundColor: '#F1F2F6',
+                color: '#000',
+              },
+              'pre[class*="language-"] > code[class*="language-"]': {
+                ...materialDark[
+                  'pre[class*="language-"] > code[class*="language-"]'
+                ],
+                backgroundColor: '#F1F2F6',
+                border: 'none',
+              },
+              'code[class*="language-"]': {
+                backgroundColor: '#F1F2F6',
+                border: 'none',
+              },
+            }}
+            language={match[1]}
+            PreTag="div"
+            {...props}
+          >
+            {codeString}
+          </SyntaxHighlighter>
+        </div>
       ) : (
         <code className={className} {...props}>
           {children}
@@ -57,18 +84,18 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
     },
   };
 
-  //   const messageText = `well this is the code you requested
-  // \`\`\`jsx
-  // const ExampleComponent = () => {
-  //   return (
-  //     <div>
-  //       <h1>Hello, World!</h1>
-  //       <p>Welcome to our site.</p>
-  //     </div>
-  //   );
-  // };
-  // \`\`\`
-  // `;
+  const messageText = `well this is the code you requested
+  \`\`\`jsx
+  const ExampleComponent = () => {
+    return (
+      <div>
+        <h1>Hello, World!</h1>
+        <p>Welcome to our site.</p>
+      </div>
+    );
+  };
+  \`\`\`
+  `;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -108,7 +135,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
               style={{ display: 'flex', alignItems: 'center' }}
             />
           ) : (
-            <ReactMarkdown children={message.text} components={renderers} />
+            <ReactMarkdown children={messageText} components={renderers} />
           )}
         </div>
       </div>

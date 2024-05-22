@@ -1,3 +1,4 @@
+import Footer from '../layout/Footer';
 import userManager from '../utils/userManager';
 import styles from './LoginPage.module.css';
 
@@ -17,6 +18,7 @@ const LoginPage = () => {
           </button>
         </div>
       </div>
+      <Footer />
     </>
   );
 };
