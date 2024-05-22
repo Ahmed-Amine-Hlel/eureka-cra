@@ -18,14 +18,12 @@ interface SidebarProps {
   handleNewSession: () => void;
   handleSessionDelete: (sessionId: string) => void;
   sidebarOpen: boolean;
-  toggleSidebar: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
   handleNewSession,
   handleSessionDelete,
   sidebarOpen,
-  toggleSidebar,
 }) => {
   const { sessions, deleteSession } = useSessions();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);

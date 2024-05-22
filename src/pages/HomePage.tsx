@@ -182,7 +182,6 @@ function HomePage() {
         handleNewSession={handleNewSession}
         handleSessionDelete={handleSessionDelete}
         sidebarOpen={sidebarOpen}
-        toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
       />
       <div
         style={{
