@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
-// import Footer from './layout/Footer';
 import { SessionProvider } from './contexts/SessionContext';
 
 function App() {
@@ -20,7 +19,6 @@ function App() {
             }
           />
         </Routes>
-        {/* <Footer /> */}
       </BrowserRouter>
     </main>
   );

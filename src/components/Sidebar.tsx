@@ -7,6 +7,7 @@ import {
   Menu,
   MenuItem,
   Typography,
+  TextField,
 } from '@mui/material';
 import { useSessions } from '../contexts/SessionContext';
 import ModeToggle from './ModeToggle';
@@ -25,9 +26,11 @@ const Sidebar: React.FC<SidebarProps> = ({
   handleSessionDelete,
   sidebarOpen,
 }) => {
-  const { sessions, deleteSession } = useSessions();
+  const { sessions, deleteSession, renameSession } = useSessions();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+  const [newSessionName, setNewSessionName] = useState<string>('');
 
   const openMenu = (
     event: MouseEvent<HTMLButtonElement>,
@@ -49,6 +52,42 @@ const Sidebar: React.FC<SidebarProps> = ({
       handleSessionDelete(currentSessionId);
       handleClose();
     }
+  };
+
+  const handleDoubleClick = (sessionId: string, sessionName: string) => {
+    setEditingSessionId(sessionId);
+    setNewSessionName(sessionName);
+  };
+
+  const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setNewSessionName(event.target.value);
+  };
+
+  const handleNameSubmit = (
+    event: React.KeyboardEvent<HTMLDivElement>,
+    sessionId: string
+  ) => {
+    if (event.key === 'Enter') {
+      if (newSessionName.trim() === '') {
+        setNewSessionName(
+          sessions.find((session) => session.id === sessionId)?.name || ''
+        );
+      } else {
+        renameSession(sessionId, newSessionName);
+      }
+      setEditingSessionId(null);
+    }
+  };
+
+  const handleBlur = (sessionId: string) => {
+    if (newSessionName.trim() === '') {
+      setNewSessionName(
+        sessions.find((session) => session.id === sessionId)?.name || ''
+      );
+    } else {
+      renameSession(sessionId, newSessionName);
+    }
+    setEditingSessionId(null);
   };
 
   return (
@@ -102,6 +141,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             style={{
               overflowY: 'auto',
               flex: 1,
+              width: '100%',
             }}
           >
             {sessions.map((session) => (
@@ -109,12 +149,26 @@ const Sidebar: React.FC<SidebarProps> = ({
                 key={session.id}
                 onClick={() => console.log('Session selected:', session.id)}
                 divider={true}
+                style={{ width: '100%' }}
               >
-                <ListItemText
-                  primary={session.name}
-                  primaryTypographyProps={{ fontSize: '0.875rem' }}
-                />
-
+                {editingSessionId === session.id ? (
+                  <TextField
+                    value={newSessionName}
+                    onChange={handleNameChange}
+                    onKeyDown={(event) => handleNameSubmit(event, session.id)}
+                    onBlur={() => handleBlur(session.id)}
+                    autoFocus
+                    fullWidth
+                  />
+                ) : (
+                  <ListItemText
+                    primary={session.name}
+                    primaryTypographyProps={{ fontSize: '0.875rem' }}
+                    onDoubleClick={() =>
+                      handleDoubleClick(session.id, session.name)
+                    }
+                  />
+                )}
                 <IconButton onClick={(event) => openMenu(event, session.id)}>
                   <MoreHorizIcon style={{ color: 'black' }} />
                 </IconButton>
