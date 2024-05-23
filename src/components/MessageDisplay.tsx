@@ -84,18 +84,18 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
     },
   };
 
-  const messageText = `well this is the code you requested
-  \`\`\`jsx
-  const ExampleComponent = () => {
-    return (
-      <div>
-        <h1>Hello, World!</h1>
-        <p>Welcome to our site.</p>
-      </div>
-    );
-  };
-  \`\`\`
-  `;
+  // const messageText = `well this is the code you requested
+  // \`\`\`jsx
+  // const ExampleComponent = () => {
+  //   return (
+  //     <div>
+  //       <h1>Hello, World!</h1>
+  //       <p>Welcome to our site.</p>
+  //     </div>
+  //   );
+  // };
+  // \`\`\`
+  // `;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -135,7 +135,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
               style={{ display: 'flex', alignItems: 'center' }}
             />
           ) : (
-            <ReactMarkdown children={messageText} components={renderers} />
+            <ReactMarkdown children={message.text} components={renderers} />
           )}
         </div>
       </div>
