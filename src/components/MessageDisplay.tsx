@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import PersonIcon from '@mui/icons-material/Person';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
+// import PersonIcon from '@mui/icons-material/Person';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
 import SourceAccordion from './SourceAccordion';
@@ -98,37 +98,59 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
   // `;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: message.sender === 'user' ? 'flex-end' : 'flex-start',
+        marginBottom: '16px',
+      }}
+    >
       <div
         style={{
           display: 'flex',
           gap: '16px',
           alignItems: 'center',
-          padding: '8px 12px',
+          // padding: '8px 12px',
+          padding: message.sender === 'user' ? '0 12px' : '8px 12px',
           borderRadius: '10px',
-          background: message.sender === 'user' ? '#E8EBEF' : 'transparent',
-          overflowWrap: 'break-word',
-          wordBreak: 'break-word',
-          maxWidth: '100%',
+          background: message.sender === 'user' ? '#E8EBEF' : '#F1F2F6',
+          maxWidth: '60%',
+          flexGrow: 1,
         }}
       >
-        <div
-          style={{
-            padding: '6px',
-            borderRadius: '100%',
-            background: message.sender === 'user' ? '#2fa470' : '#0033A0',
-            display: 'flex',
-            alignSelf: 'flex-start',
-            marginTop: '10px',
-          }}
-        >
-          {message.sender === 'user' ? (
+        {/* {message.sender === 'user' ? (
+          <div
+            style={{
+              padding: '6px',
+              borderRadius: '100%',
+              background: '#2fa470',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              alignSelf: 'flex-start',
+            }}
+          >
             <PersonIcon style={{ color: '#F1F2F6', fontSize: '1.75rem' }} />
-          ) : (
+          </div>
+        ) : ( */}
+        {message.sender === 'bot' && (
+          <div
+            style={{
+              padding: '6px',
+              borderRadius: '100%',
+              background: '#0033A0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              alignSelf: 'flex-start',
+            }}
+          >
             <SmartToyIcon style={{ color: '#F1F2F6', fontSize: '1.75rem' }} />
-          )}
-        </div>
-        <div style={{ fontSize: '1rem', breakInside: 'avoid', flexGrow: 1 }}>
+          </div>
+        )}
+        {/* )} */}
+        <div style={{ fontSize: '1rem', flex: 1 }}>
           {message.text === 'loading' ? (
             <CircularProgress
               size={16}
