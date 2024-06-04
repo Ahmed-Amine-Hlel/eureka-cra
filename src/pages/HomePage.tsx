@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { Message } from '../types/message';
-import { getChatbotResponse } from '../api';
 import MessageDisplay from '../components/MessageDisplay';
 import FeedbackDialog from '../components/FeedbackDialog';
 import ChatInput from '../components/ChatInput';
@@ -36,8 +35,17 @@ function HomePage() {
       });
   }, []);
 
-  const { createSessionWithMessage, sessions } = useSessions();
-  const currentSessionId = sessions.length ? sessions[0].id : null;
+  const {
+    createSessionWithMessage,
+    sendMessageInSession,
+    sessions,
+    fetchMessages,
+    removeSession,
+    renameSessionInContext,
+  } = useSessions();
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(
+    sessions.length ? sessions[0].id : null
+  );
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -45,7 +53,7 @@ function HomePage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
-  const [feedbackMessageId, setFeedbackMessageId] = useState<number | null>(
+  const [feedbackMessageId, setFeedbackMessageId] = useState<string | null>(
     null
   );
   const [feedbackReason, setFeedbackReason] = useState('');
@@ -57,35 +65,39 @@ function HomePage() {
 
   const handleSendMessage = async (messageText: string) => {
     setIsLoading(true);
-    if (messages.length === 0) {
-      await createSessionWithMessage(messageText);
+    let botResponse: Message | null = null;
+    if (messages.length === 0 && currentSessionId) {
+      botResponse = await createSessionWithMessage(messageText);
+    } else if (currentSessionId) {
+      botResponse = await sendMessageInSession(currentSessionId, messageText);
     }
 
     const newMessage: Message = {
-      id: Date.now(),
-      text: messageText,
-      sender: 'user',
+      userMessage: messageText,
+      sources: [],
+      includedDocuments: [],
+      allDocumentsIncluded: false,
+      userMessageId: Date.now().toString(),
+      botResponseId: '',
+      botResponse: 'loading',
     };
     setMessages([...messages, newMessage]);
 
-    const conversationHistory = messages.map((m) => m.text).join('#');
+    if (botResponse) {
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          ...newMessage,
+          botResponse: botResponse.botResponse,
+          botResponseId: botResponse.botResponseId,
+        },
+      ]);
 
-    console.log('conversationHistory :', conversationHistory);
-    const botResponse = await getChatbotResponse(
-      messageText,
-      conversationHistory
-    );
-
-    const botMessageId = Date.now() + 1000000;
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      { id: botMessageId, text: 'loading', sender: 'bot' },
-    ]);
-
-    simulateBotResponse(botResponse, botMessageId);
+      simulateBotResponse(botResponse.botResponse, botResponse.botResponseId);
+    }
   };
 
-  const simulateBotResponse = (botMessage: string, botMessageId: number) => {
+  const simulateBotResponse = (botMessage: string, botMessageId: string) => {
     let currentMessage = '';
     let totalDelay = 0;
     const chars = botMessage.split('');
@@ -98,8 +110,8 @@ function HomePage() {
         currentMessage += char;
         setMessages((prevMessages) => {
           return prevMessages.map((msg) => {
-            if (msg.id === botMessageId) {
-              return { ...msg, text: currentMessage.trim() };
+            if (msg.botResponseId === botMessageId) {
+              return { ...msg, botResponse: currentMessage.trim() };
             }
             return msg;
           });
@@ -116,17 +128,22 @@ function HomePage() {
     setMessages([]);
   };
 
-  const handleSessionDelete = (sessionId: string) => {
+  const handleSessionDelete = async (sessionId: string) => {
+    await removeSession(sessionId);
     if (sessionId === currentSessionId) {
       setMessages([]);
     }
   };
 
-  const handleFeedback = (messageId: number, feedback: 'up' | 'down') => {
+  const handleSessionRename = async (sessionId: string, newName: string) => {
+    await renameSessionInContext(sessionId, newName);
+  };
+
+  const handleFeedback = (messageId: string, feedback: 'up' | 'down') => {
     openFeedbackDialog(messageId, feedback);
   };
 
-  const openFeedbackDialog = (messageId: number, feedback: 'up' | 'down') => {
+  const openFeedbackDialog = (messageId: string, feedback: 'up' | 'down') => {
     setFeedbackDialogOpen(true);
     setFeedbackMessageId(messageId);
     setFeedbackType(feedback);
@@ -146,7 +163,7 @@ function HomePage() {
 
       setMessages(
         messages.map((message) =>
-          message.id === feedbackMessageId
+          message.userMessageId === feedbackMessageId
             ? {
                 ...message,
                 feedbackReason,
@@ -165,7 +182,7 @@ function HomePage() {
       setTimeout(() => {
         setMessages(
           messages.map((message) =>
-            message.id === feedbackMessageId
+            message.userMessageId === feedbackMessageId
               ? { ...message, feedbackAnimationCompleted: true }
               : message
           )
@@ -174,11 +191,18 @@ function HomePage() {
     }
   };
 
+  const handleSessionSelect = async (sessionId: string) => {
+    setCurrentSessionId(sessionId);
+    await fetchMessages(sessionId);
+  };
+
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
       <Sidebar
         handleNewSession={handleNewSession}
         handleSessionDelete={handleSessionDelete}
+        handleSessionRename={handleSessionRename}
+        handleSessionSelect={handleSessionSelect}
         sidebarOpen={sidebarOpen}
       />
       <div
@@ -234,7 +258,7 @@ function HomePage() {
           >
             {messages.map((message) => (
               <MessageDisplay
-                key={message.id}
+                key={message.userMessageId}
                 message={message}
                 onFeedback={handleFeedback}
               />

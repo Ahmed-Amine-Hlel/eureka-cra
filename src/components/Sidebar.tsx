@@ -18,15 +18,19 @@ import AddBoxIcon from '@mui/icons-material/AddBox';
 interface SidebarProps {
   handleNewSession: () => void;
   handleSessionDelete: (sessionId: string) => void;
+  handleSessionRename: (sessionId: string, newName: string) => void;
+  handleSessionSelect: (sessionId: string) => void;
   sidebarOpen: boolean;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
   handleNewSession,
   handleSessionDelete,
+  handleSessionRename,
+  handleSessionSelect,
   sidebarOpen,
 }) => {
-  const { sessions, deleteSession, renameSession } = useSessions();
+  const { sessions, removeSession, renameSessionInContext } = useSessions();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
@@ -46,9 +50,9 @@ const Sidebar: React.FC<SidebarProps> = ({
     setCurrentSessionId(null);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (currentSessionId) {
-      deleteSession(currentSessionId);
+      await removeSession(currentSessionId);
       handleSessionDelete(currentSessionId);
       handleClose();
     }
@@ -63,7 +67,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     setNewSessionName(event.target.value);
   };
 
-  const handleNameSubmit = (
+  const handleNameSubmit = async (
     event: React.KeyboardEvent<HTMLDivElement>,
     sessionId: string
   ) => {
@@ -73,19 +77,21 @@ const Sidebar: React.FC<SidebarProps> = ({
           sessions.find((session) => session.id === sessionId)?.name || ''
         );
       } else {
-        renameSession(sessionId, newSessionName);
+        await renameSessionInContext(sessionId, newSessionName);
+        handleSessionRename(sessionId, newSessionName);
       }
       setEditingSessionId(null);
     }
   };
 
-  const handleBlur = (sessionId: string) => {
+  const handleBlur = async (sessionId: string) => {
     if (newSessionName.trim() === '') {
       setNewSessionName(
         sessions.find((session) => session.id === sessionId)?.name || ''
       );
     } else {
-      renameSession(sessionId, newSessionName);
+      await renameSessionInContext(sessionId, newSessionName);
+      handleSessionRename(sessionId, newSessionName);
     }
     setEditingSessionId(null);
   };
@@ -147,7 +153,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             {sessions.map((session) => (
               <ListItemButton
                 key={session.id}
-                onClick={() => console.log('Session selected:', session.id)}
+                onClick={() => handleSessionSelect(session.id)}
                 divider={true}
                 style={{ width: '100%' }}
               >

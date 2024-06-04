@@ -6,13 +6,27 @@ import React, {
   useEffect,
 } from 'react';
 import { Session } from '../types/session';
-import { createSession, getSessions } from '../api';
+import { Message } from '../types/message';
+import {
+  getSessions,
+  createSession,
+  getMessages,
+  sendMessage,
+  renameSession as apiRenameSession,
+  deleteSession,
+} from '../api';
 
 type SessionContextType = {
   sessions: Session[];
-  deleteSession: (sessionId: string) => void;
-  renameSession: (sessionId: string, newName: string) => void;
-  createSessionWithMessage: (message: string) => Promise<void>;
+  messages: Message[];
+  fetchMessages: (conversationId: string) => Promise<void>;
+  removeSession: (sessionId: string) => void;
+  renameSessionInContext: (sessionId: string, newName: string) => void;
+  createSessionWithMessage: (message: string) => Promise<Message>;
+  sendMessageInSession: (
+    conversationId: string,
+    message: string
+  ) => Promise<Message>;
 };
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
@@ -25,6 +39,7 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({
   children,
 }) => {
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   useEffect(() => {
     const fetchSessions = async () => {
@@ -45,21 +60,35 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({
     fetchSessions();
   }, []);
 
-  const deleteSession = (sessionId: string) => {
-    setSessions((prevSessions) =>
-      prevSessions.filter((session) => session.id !== sessionId)
-    );
+  const removeSession = async (sessionId: string) => {
+    try {
+      await deleteSession(sessionId);
+      setSessions((prevSessions) =>
+        prevSessions.filter((session) => session.id !== sessionId)
+      );
+    } catch (error) {
+      console.error('Failed to delete session:', error);
+    }
   };
 
-  const renameSession = (sessionId: string, newName: string) => {
-    setSessions((prevSessions) =>
-      prevSessions.map((session) =>
-        session.id === sessionId ? { ...session, name: newName } : session
-      )
-    );
+  const renameSessionInContext = async (sessionId: string, newName: string) => {
+    try {
+      const updatedSession = await apiRenameSession(sessionId, newName);
+      setSessions((prevSessions) =>
+        prevSessions.map((session) =>
+          session.id === sessionId
+            ? { ...session, name: updatedSession.name }
+            : session
+        )
+      );
+    } catch (error) {
+      console.error('Failed to rename session:', error);
+    }
   };
 
-  const createSessionWithMessage = async (message: string) => {
+  const createSessionWithMessage = async (
+    message: string
+  ): Promise<Message> => {
     try {
       const session = await createSession(message);
       const newSession: Session = {
@@ -68,8 +97,62 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({
         createdAt: new Date(session.conversation_creation_date),
       };
       setSessions((prevSessions) => [newSession, ...prevSessions]);
+      const newMessage: Message = {
+        userMessage: session.user_message,
+        sources: session.sources,
+        includedDocuments: session.included_documents,
+        allDocumentsIncluded: session.all_documents_included,
+        userMessageId: session.user_message_id,
+        botResponseId: session.bot_response_id,
+        botResponse: session.bot_response,
+      };
+      setMessages([newMessage]);
+      return newMessage;
     } catch (error) {
       console.error('Failed to create session with message:', error);
+      throw error;
+    }
+  };
+
+  const fetchMessages = async (conversationId: string): Promise<void> => {
+    try {
+      const messages = await getMessages(conversationId);
+      setMessages(
+        messages.map((message: any) => ({
+          userMessage: message.user_message,
+          sources: message.sources,
+          includedDocuments: message.included_documents,
+          allDocumentsIncluded: message.all_documents_included,
+          userMessageId: message.user_message_id,
+          botResponseId: message.bot_response_id,
+          botResponse: message.bot_response,
+        }))
+      );
+    } catch (error) {
+      console.error('Failed to fetch messages:', error);
+    }
+  };
+
+  const sendMessageInSession = async (
+    conversationId: string,
+    message: string
+  ): Promise<Message> => {
+    try {
+      const response = await sendMessage(conversationId, message);
+      const newMessage: Message = {
+        userMessage: response.user_message,
+        sources: response.sources,
+        includedDocuments: response.included_documents,
+        allDocumentsIncluded: response.all_documents_included,
+        userMessageId: response.user_message_id,
+        botResponseId: response.bot_response_id,
+        botResponse: response.bot_response,
+      };
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
+      return newMessage;
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      throw error;
     }
   };
 
@@ -77,9 +160,12 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({
     <SessionContext.Provider
       value={{
         sessions,
-        deleteSession,
-        renameSession,
+        messages,
+        fetchMessages,
+        removeSession,
+        renameSessionInContext,
         createSessionWithMessage,
+        sendMessageInSession,
       }}
     >
       {children}

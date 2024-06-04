@@ -3,10 +3,6 @@ import { refreshTokenIfNeeded } from '../utils/authService';
 
 const API_BASE_URL = process.env.REACT_APP_BASE_URL;
 
-interface ChatbotApiResponse {
-  bot_response: string;
-}
-
 const chatbotApi = axios.create({
   baseURL: API_BASE_URL,
 });
@@ -29,31 +25,12 @@ chatbotApi.interceptors.request.use(
   }
 );
 
-export const getChatbotResponse = async (
-  messageText: string,
-  conversationHistory?: string
-): Promise<string> => {
-  try {
-    const response = await chatbotApi.post<ChatbotApiResponse>(
-      '/chatbot/send-message',
-      {
-        message: messageText,
-        conversation_history: conversationHistory,
-      }
-    );
-
-    const botResponse = response.data.bot_response;
-    return botResponse || 'Sorry, I did not understand that.';
-  } catch (error) {
-    console.error('Error communicating with the chatbot:', error);
-    return 'There was an error processing your request.';
-  }
-};
-
 // Fetch all sessions (Conversations)
 export const getSessions = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/chatbot/conversations`);
+    const response = await chatbotApi.get(
+      `${API_BASE_URL}/chatbot/conversations`
+    );
     return response.data;
   } catch (error) {
     console.error('Failed to fetch sessions:', error);
@@ -61,17 +38,78 @@ export const getSessions = async () => {
   }
 };
 
+// Fetch messages for a specific session (conversation)
+export const getMessages = async (conversationId: string) => {
+  try {
+    const response = await chatbotApi.get(
+      `/chatbot/conversations/${conversationId}/messages`
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch messages:', error);
+    throw error;
+  }
+};
+
 // Create a new session (conversation)
 export const createSession = async (message: string) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/chatbot/conversations`, {
-      message,
-      included_documents: [],
-      all_documents_included: false,
-    });
+    const response = await chatbotApi.post(
+      `${API_BASE_URL}/chatbot/conversations`,
+      {
+        message,
+        included_documents: [],
+        all_documents_included: false,
+      }
+    );
     return response.data;
   } catch (error) {
     console.error('Failed to create session:', error);
+    throw error;
+  }
+};
+
+// Send a message in a specific session (conversation)
+export const sendMessage = async (conversationId: string, message: string) => {
+  try {
+    const response = await chatbotApi.post(
+      `/chatbot/conversations/${conversationId}/messages`,
+      {
+        message,
+        included_documents: [],
+        all_documents_included: false,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Failed to send message:', error);
+    throw error;
+  }
+};
+
+// Rename a session (conversation)
+export const renameSession = async (conversationId: string, name: string) => {
+  try {
+    const response = await chatbotApi.patch(
+      `/chatbot/conversations/${conversationId}`,
+      { name }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Failed to rename session:', error);
+    throw error;
+  }
+};
+
+// Delete a session (conversation)
+export const deleteSession = async (conversationId: string) => {
+  try {
+    const response = await chatbotApi.delete(
+      `/chatbot/conversations/${conversationId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Failed to delete session:', error);
     throw error;
   }
 };

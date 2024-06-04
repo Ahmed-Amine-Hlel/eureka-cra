@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
-// import PersonIcon from '@mui/icons-material/Person';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
 import SourceAccordion from './SourceAccordion';
@@ -15,7 +14,7 @@ import Tooltip from '@mui/material/Tooltip';
 
 interface MessageDisplayProps {
   message: Message;
-  onFeedback: (messageId: number, feedback: 'up' | 'down') => void;
+  onFeedback: (messageId: string, feedback: 'up' | 'down') => void;
 }
 
 const MessageDisplay: React.FC<MessageDisplayProps> = ({
@@ -84,25 +83,12 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
     },
   };
 
-  // const messageText = `well this is the code you requested
-  // \`\`\`jsx
-  // const ExampleComponent = () => {
-  //   return (
-  //     <div>
-  //       <h1>Hello, World!</h1>
-  //       <p>Welcome to our site.</p>
-  //     </div>
-  //   );
-  // };
-  // \`\`\`
-  // `;
-
   return (
     <div
       style={{
         display: 'flex',
         flexDirection: 'column',
-        alignItems: message.sender === 'user' ? 'flex-end' : 'flex-start',
+        alignItems: message.userMessageId ? 'flex-end' : 'flex-start',
         marginBottom: '16px',
       }}
     >
@@ -111,30 +97,14 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
           display: 'flex',
           gap: '16px',
           alignItems: 'center',
-          // padding: '8px 12px',
-          padding: message.sender === 'user' ? '0 12px' : '8px 12px',
+          padding: message.userMessageId ? '0 12px' : '8px 12px',
           borderRadius: '10px',
-          background: message.sender === 'user' ? '#E8EBEF' : '#F1F2F6',
+          background: message.userMessageId ? '#E8EBEF' : '#F1F2F6',
           maxWidth: '60%',
           flexGrow: 1,
         }}
       >
-        {/* {message.sender === 'user' ? (
-          <div
-            style={{
-              padding: '6px',
-              borderRadius: '100%',
-              background: '#2fa470',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              alignSelf: 'flex-start',
-            }}
-          >
-            <PersonIcon style={{ color: '#F1F2F6', fontSize: '1.75rem' }} />
-          </div>
-        ) : ( */}
-        {message.sender === 'bot' && (
+        {message.botResponseId && (
           <div
             style={{
               padding: '6px',
@@ -149,21 +119,23 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
             <SmartToyIcon style={{ color: '#F1F2F6', fontSize: '1.75rem' }} />
           </div>
         )}
-        {/* )} */}
         <div style={{ fontSize: '1rem', flex: 1 }}>
-          {message.text === 'loading' ? (
+          {message.botResponse === 'loading' ? (
             <CircularProgress
               size={16}
               style={{ display: 'flex', alignItems: 'center' }}
             />
           ) : (
-            <ReactMarkdown children={message.text} components={renderers} />
+            <ReactMarkdown
+              children={message.botResponse}
+              components={renderers}
+            />
           )}
         </div>
       </div>
-      {message.sender === 'bot' && message.text !== 'loading' && (
+      {message.botResponseId && message.botResponse !== 'loading' && (
         <>
-          <SourceAccordion />
+          <SourceAccordion sources={message.sources} />
           {!message.feedbackAnimationCompleted && (
             <div
               style={{
@@ -180,7 +152,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
               }}
             >
               <ThumbUpOffAltIcon
-                onClick={() => onFeedback(message.id, 'up')}
+                onClick={() => onFeedback(message.userMessageId, 'up')}
                 style={{
                   cursor: 'pointer',
                   marginRight: 8,
@@ -194,7 +166,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
                 }}
               />
               <ThumbDownOffAltIcon
-                onClick={() => onFeedback(message.id, 'down')}
+                onClick={() => onFeedback(message.userMessageId, 'down')}
                 style={{
                   cursor: 'pointer',
                   color:
