@@ -28,9 +28,7 @@ chatbotApi.interceptors.request.use(
 // Fetch all sessions (Conversations)
 export const getSessions = async () => {
   try {
-    const response = await chatbotApi.get(
-      `${API_BASE_URL}/chatbot/conversations`
-    );
+    const response = await chatbotApi.get('/chatbot/conversations');
     return response.data;
   } catch (error) {
     console.error('Failed to fetch sessions:', error);
@@ -54,14 +52,11 @@ export const getMessages = async (conversationId: string) => {
 // Create a new session (conversation)
 export const createSession = async (message: string) => {
   try {
-    const response = await chatbotApi.post(
-      `${API_BASE_URL}/chatbot/conversations`,
-      {
-        message,
-        included_documents: [],
-        all_documents_included: false,
-      }
-    );
+    const response = await chatbotApi.post('/chatbot/conversations', {
+      message,
+      included_documents: [],
+      all_documents_included: false,
+    });
     return response.data;
   } catch (error) {
     console.error('Failed to create session:', error);
@@ -110,6 +105,28 @@ export const deleteSession = async (conversationId: string) => {
     return response.data;
   } catch (error) {
     console.error('Failed to delete session:', error);
+    throw error;
+  }
+};
+
+// Send feedback for a specific message in a session (conversation)
+export const sendFeedback = async (
+  conversationId: string,
+  messageId: string,
+  feedbackMessage: string,
+  isPositiveFeedback: boolean
+) => {
+  try {
+    const response = await chatbotApi.post(
+      `/chatbot/conversations/${conversationId}/messages/${messageId}/feedbacks`,
+      {
+        feedback_message: feedbackMessage,
+        is_positive_feedback: isPositiveFeedback,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Failed to send feedback:', error);
     throw error;
   }
 };

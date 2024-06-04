@@ -14,6 +14,7 @@ import {
   sendMessage,
   renameSession as apiRenameSession,
   deleteSession,
+  sendFeedback as apiSendFeedback,
 } from '../api';
 
 type SessionContextType = {
@@ -27,6 +28,12 @@ type SessionContextType = {
     conversationId: string,
     message: string
   ) => Promise<Message>;
+  sendFeedback: (
+    conversationId: string,
+    messageId: string,
+    feedbackMessage: string,
+    isPositiveFeedback: boolean
+  ) => Promise<void>;
 };
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
@@ -156,6 +163,25 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({
     }
   };
 
+  const sendFeedback = async (
+    conversationId: string,
+    messageId: string,
+    feedbackMessage: string,
+    isPositiveFeedback: boolean
+  ): Promise<void> => {
+    try {
+      await apiSendFeedback(
+        conversationId,
+        messageId,
+        feedbackMessage,
+        isPositiveFeedback
+      );
+    } catch (error) {
+      console.error('Failed to send feedback:', error);
+      throw error;
+    }
+  };
+
   return (
     <SessionContext.Provider
       value={{
@@ -166,6 +192,7 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({
         renameSessionInContext,
         createSessionWithMessage,
         sendMessageInSession,
+        sendFeedback,
       }}
     >
       {children}

@@ -42,6 +42,7 @@ function HomePage() {
     fetchMessages,
     removeSession,
     renameSessionInContext,
+    sendFeedback,
   } = useSessions();
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(
     sessions.length ? sessions[0].id : null
@@ -57,6 +58,7 @@ function HomePage() {
     null
   );
   const [feedbackReason, setFeedbackReason] = useState('');
+
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -140,13 +142,13 @@ function HomePage() {
   };
 
   const handleFeedback = (messageId: string, feedback: 'up' | 'down') => {
-    openFeedbackDialog(messageId, feedback);
+    setFeedbackType(feedback);
+    openFeedbackDialog(messageId);
   };
 
-  const openFeedbackDialog = (messageId: string, feedback: 'up' | 'down') => {
+  const openFeedbackDialog = (messageId: string) => {
     setFeedbackDialogOpen(true);
     setFeedbackMessageId(messageId);
-    setFeedbackType(feedback);
   };
 
   const handleFeedbackReasonChange = (
@@ -155,23 +157,14 @@ function HomePage() {
     setFeedbackReason(event.target.value);
   };
 
-  const handleFeedbackSubmit = () => {
+  const handleFeedbackSubmit = async () => {
     if (feedbackMessageId != null && feedbackType != null) {
-      const feedbackValue = `selected-${feedbackType}` as
-        | 'selected-up'
-        | 'selected-down';
-
-      setMessages(
-        messages.map((message) =>
-          message.userMessageId === feedbackMessageId
-            ? {
-                ...message,
-                feedbackReason,
-                feedback: feedbackValue,
-                feedbackAnimationCompleted: false,
-              }
-            : message
-        )
+      const isPositiveFeedback = feedbackType === 'up';
+      await sendFeedback(
+        currentSessionId!,
+        feedbackMessageId,
+        feedbackReason,
+        isPositiveFeedback
       );
 
       setFeedbackDialogOpen(false);
