@@ -1,16 +1,18 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-
-export type Session = {
-  id: string;
-  name: string;
-  createdAt: Date;
-};
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from 'react';
+import { Session } from '../types/session';
+import { createSession, getSessions } from '../api';
 
 type SessionContextType = {
   sessions: Session[];
-  addSession: (sessionName: string) => void;
   deleteSession: (sessionId: string) => void;
   renameSession: (sessionId: string, newName: string) => void;
+  createSessionWithMessage: (message: string) => Promise<void>;
 };
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
@@ -24,14 +26,24 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({
 }) => {
   const [sessions, setSessions] = useState<Session[]>([]);
 
-  const addSession = (sessionName: string) => {
-    const newSession: Session = {
-      id: `session-${Date.now()}`,
-      name: sessionName,
-      createdAt: new Date(),
+  useEffect(() => {
+    const fetchSessions = async () => {
+      try {
+        const sessions = await getSessions();
+        setSessions(
+          sessions.map((session: any) => ({
+            id: session.conversation_id,
+            name: session.name,
+            createdAt: new Date(session.creation_date),
+          }))
+        );
+      } catch (error) {
+        console.error('Failed to fetch sessions:', error);
+      }
     };
-    setSessions((prevSessions) => [newSession, ...prevSessions]);
-  };
+
+    fetchSessions();
+  }, []);
 
   const deleteSession = (sessionId: string) => {
     setSessions((prevSessions) =>
@@ -47,9 +59,28 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({
     );
   };
 
+  const createSessionWithMessage = async (message: string) => {
+    try {
+      const session = await createSession(message);
+      const newSession: Session = {
+        id: session.conversation_id,
+        name: session.conversation_name,
+        createdAt: new Date(session.conversation_creation_date),
+      };
+      setSessions((prevSessions) => [newSession, ...prevSessions]);
+    } catch (error) {
+      console.error('Failed to create session with message:', error);
+    }
+  };
+
   return (
     <SessionContext.Provider
-      value={{ sessions, addSession, deleteSession, renameSession }}
+      value={{
+        sessions,
+        deleteSession,
+        renameSession,
+        createSessionWithMessage,
+      }}
     >
       {children}
     </SessionContext.Provider>

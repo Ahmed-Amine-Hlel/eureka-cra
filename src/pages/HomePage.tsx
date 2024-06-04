@@ -36,7 +36,7 @@ function HomePage() {
       });
   }, []);
 
-  const { addSession, sessions } = useSessions();
+  const { createSessionWithMessage, sessions } = useSessions();
   const currentSessionId = sessions.length ? sessions[0].id : null;
 
   const [messages, setMessages] = useState<Message[]>([]);
@@ -58,9 +58,7 @@ function HomePage() {
   const handleSendMessage = async (messageText: string) => {
     setIsLoading(true);
     if (messages.length === 0) {
-      const timestamp = new Date().toLocaleString();
-      const sessionName = `Eureka ${timestamp}`;
-      addSession(sessionName);
+      await createSessionWithMessage(messageText);
     }
 
     const newMessage: Message = {

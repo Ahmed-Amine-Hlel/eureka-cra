@@ -1,12 +1,14 @@
 import axios from 'axios';
 import { refreshTokenIfNeeded } from '../utils/authService';
 
+const API_BASE_URL = process.env.REACT_APP_BASE_URL;
+
 interface ChatbotApiResponse {
   bot_response: string;
 }
 
 const chatbotApi = axios.create({
-  baseURL: process.env.REACT_APP_BASE_URL,
+  baseURL: API_BASE_URL,
 });
 
 chatbotApi.interceptors.request.use(
@@ -45,5 +47,31 @@ export const getChatbotResponse = async (
   } catch (error) {
     console.error('Error communicating with the chatbot:', error);
     return 'There was an error processing your request.';
+  }
+};
+
+// Fetch all sessions (Conversations)
+export const getSessions = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/chatbot/conversations`);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch sessions:', error);
+    throw error;
+  }
+};
+
+// Create a new session (conversation)
+export const createSession = async (message: string) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/chatbot/conversations`, {
+      message,
+      included_documents: [],
+      all_documents_included: false,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to create session:', error);
+    throw error;
   }
 };
