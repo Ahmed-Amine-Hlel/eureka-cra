@@ -1,8 +1,11 @@
-export interface Message {
-  id: number;
+export type Message = {
+  id: string;
   text: string;
   sender: 'user' | 'bot';
-  feedback?: 'up' | 'down' | 'selected-up' | 'selected-down' | null;
-  feedbackAnimationCompleted?: boolean;
+  sources?: string[];
+  includedDocuments?: string[];
+  allDocumentsIncluded?: boolean;
   feedbackReason?: string;
-}
+  feedback?: 'selected-up' | 'selected-down';
+  feedbackAnimationCompleted?: boolean;
+};

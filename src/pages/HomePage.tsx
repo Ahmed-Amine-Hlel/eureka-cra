@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Message } from '../types/message';
-import { getChatbotResponse } from '../api';
+import { createSession } from '../api';
 import MessageDisplay from '../components/MessageDisplay';
 import FeedbackDialog from '../components/FeedbackDialog';
 import ChatInput from '../components/ChatInput';
@@ -10,6 +9,7 @@ import Sidebar from '../components/Sidebar';
 import Footer from '../layout/Footer';
 import MenuIcon from '@mui/icons-material/Menu';
 import IconButton from '@mui/material/IconButton';
+import { Message } from '../types/message';
 
 function HomePage() {
   useEffect(() => {
@@ -22,8 +22,6 @@ function HomePage() {
           user.refresh_token &&
           user.expires_at
         ) {
-          console.log('Logged in user : ', user);
-
           localStorage.setItem('access_token', user.access_token);
           localStorage.setItem('refresh_token', user.refresh_token);
           localStorage.setItem('expires_at', user.expires_at.toString());
@@ -36,8 +34,13 @@ function HomePage() {
       });
   }, []);
 
-  const { createSessionWithMessage, sessions } = useSessions();
-  const currentSessionId = sessions.length ? sessions[0].id : null;
+  const {
+    addSession,
+    deleteSession,
+    loadMessages,
+    sendMessage: sendSessionMessage,
+  } = useSessions();
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -45,7 +48,7 @@ function HomePage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
-  const [feedbackMessageId, setFeedbackMessageId] = useState<number | null>(
+  const [feedbackMessageId, setFeedbackMessageId] = useState<string | null>(
     null
   );
   const [feedbackReason, setFeedbackReason] = useState('');
@@ -55,28 +58,46 @@ function HomePage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  const loadSessionMessages = async (sessionId: string) => {
+    try {
+      await loadMessages(sessionId);
+    } catch (error) {
+      console.error('Failed to load session messages:', error);
+    }
+  };
+
+  const handleSessionSelect = (sessionId: string) => {
+    setCurrentSessionId(sessionId);
+    loadSessionMessages(sessionId);
+  };
+
   const handleSendMessage = async (messageText: string) => {
     setIsLoading(true);
-    if (messages.length === 0) {
-      await createSessionWithMessage(messageText);
+    let botResponse;
+
+    if (!currentSessionId) {
+      const timestamp = new Date().toLocaleString();
+      const sessionName = `Eureka ${timestamp}`;
+      const sessionData = await createSession(messageText);
+      await addSession(sessionName, messageText);
+      setCurrentSessionId(sessionData.conversation_id);
+      botResponse = sessionData.bot_response;
+    } else {
+      const newMessage = await sendSessionMessage(
+        currentSessionId,
+        messageText
+      );
+      botResponse = newMessage.text;
     }
 
-    const newMessage: Message = {
-      id: Date.now(),
+    const userMessage: Message = {
+      id: Date.now().toString(),
       text: messageText,
       sender: 'user',
     };
-    setMessages([...messages, newMessage]);
+    setMessages([...messages, userMessage]);
 
-    const conversationHistory = messages.map((m) => m.text).join('#');
-
-    console.log('conversationHistory :', conversationHistory);
-    const botResponse = await getChatbotResponse(
-      messageText,
-      conversationHistory
-    );
-
-    const botMessageId = Date.now() + 1000000;
+    const botMessageId = (Date.now() + 1000000).toString();
     setMessages((prevMessages) => [
       ...prevMessages,
       { id: botMessageId, text: 'loading', sender: 'bot' },
@@ -85,7 +106,7 @@ function HomePage() {
     simulateBotResponse(botResponse, botMessageId);
   };
 
-  const simulateBotResponse = (botMessage: string, botMessageId: number) => {
+  const simulateBotResponse = (botMessage: string, botMessageId: string) => {
     let currentMessage = '';
     let totalDelay = 0;
     const chars = botMessage.split('');
@@ -114,19 +135,22 @@ function HomePage() {
 
   const handleNewSession = () => {
     setMessages([]);
+    setCurrentSessionId(null);
   };
 
-  const handleSessionDelete = (sessionId: string) => {
+  const handleSessionDelete = async (sessionId: string) => {
+    await deleteSession(sessionId);
     if (sessionId === currentSessionId) {
       setMessages([]);
+      setCurrentSessionId(null);
     }
   };
 
-  const handleFeedback = (messageId: number, feedback: 'up' | 'down') => {
+  const handleFeedback = (messageId: string, feedback: 'up' | 'down') => {
     openFeedbackDialog(messageId, feedback);
   };
 
-  const openFeedbackDialog = (messageId: number, feedback: 'up' | 'down') => {
+  const openFeedbackDialog = (messageId: string, feedback: 'up' | 'down') => {
     setFeedbackDialogOpen(true);
     setFeedbackMessageId(messageId);
     setFeedbackType(feedback);
@@ -179,6 +203,7 @@ function HomePage() {
       <Sidebar
         handleNewSession={handleNewSession}
         handleSessionDelete={handleSessionDelete}
+        handleSessionSelect={handleSessionSelect}
         sidebarOpen={sidebarOpen}
       />
       <div

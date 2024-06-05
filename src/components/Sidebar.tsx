@@ -18,12 +18,14 @@ import AddBoxIcon from '@mui/icons-material/AddBox';
 interface SidebarProps {
   handleNewSession: () => void;
   handleSessionDelete: (sessionId: string) => void;
+  handleSessionSelect: (sessionId: string) => void;
   sidebarOpen: boolean;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
   handleNewSession,
   handleSessionDelete,
+  handleSessionSelect,
   sidebarOpen,
 }) => {
   const { sessions, deleteSession, renameSession } = useSessions();
@@ -46,9 +48,9 @@ const Sidebar: React.FC<SidebarProps> = ({
     setCurrentSessionId(null);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (currentSessionId) {
-      deleteSession(currentSessionId);
+      await deleteSession(currentSessionId);
       handleSessionDelete(currentSessionId);
       handleClose();
     }
@@ -63,7 +65,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     setNewSessionName(event.target.value);
   };
 
-  const handleNameSubmit = (
+  const handleNameSubmit = async (
     event: React.KeyboardEvent<HTMLDivElement>,
     sessionId: string
   ) => {
@@ -73,19 +75,19 @@ const Sidebar: React.FC<SidebarProps> = ({
           sessions.find((session) => session.id === sessionId)?.name || ''
         );
       } else {
-        renameSession(sessionId, newSessionName);
+        await renameSession(sessionId, newSessionName);
       }
       setEditingSessionId(null);
     }
   };
 
-  const handleBlur = (sessionId: string) => {
+  const handleBlur = async (sessionId: string) => {
     if (newSessionName.trim() === '') {
       setNewSessionName(
         sessions.find((session) => session.id === sessionId)?.name || ''
       );
     } else {
-      renameSession(sessionId, newSessionName);
+      await renameSession(sessionId, newSessionName);
     }
     setEditingSessionId(null);
   };
@@ -128,7 +130,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             </Typography>
             <IconButton
               style={{
-                backgroundColor: '#F1F2F6 ',
+                backgroundColor: '#F1F2F6',
                 margin: '15px',
                 alignSelf: 'flex-end',
               }}
@@ -147,7 +149,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             {sessions.map((session) => (
               <ListItemButton
                 key={session.id}
-                onClick={() => console.log('Session selected:', session.id)}
+                onClick={() => handleSessionSelect(session.id)}
                 divider={true}
                 style={{ width: '100%' }}
               >
